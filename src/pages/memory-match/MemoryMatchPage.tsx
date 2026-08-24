@@ -6,14 +6,23 @@ import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
 import { GameActions, GameHeader, MatchResultOverlay, ScoreStrip, Tip } from '../../components/react-layout';
 import './memory-match.css';
 import { useI18n } from '../../app/i18n';
-
-type Card = { symbol: string; flipped: boolean; matched: boolean; matchedBy: Player | null };
-const SYMBOLS = ['✦', '●', '◆', '✚', '☀', '◒', '⬟', '✿'];
+import {
+  chooseMemoryBotCard,
+  createMemoryDeck,
+  forgetCards,
+  getAvailableCards,
+  MEMORY_SYMBOLS,
+  rememberCard,
+  resolveMemoryPair,
+  revealMemoryCard,
+  type BotMemory,
+  type MemoryCard,
+} from './memory-match-logic';
 
 export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: () => void }) {
   const { language, t } = useI18n();
   const mode = setup.mode;
-  const [cards, setCards] = useState<Card[]>(createDeck);
+  const [cards, setCards] = useState<MemoryCard[]>(createMemoryDeck);
   const [turn, setTurn] = useState<Player>('X');
   const [scores, setScores] = useState<Record<Player, number>>({ X: 0, O: 0 });
   const [selected, setSelected] = useState<number[]>([]);
@@ -22,6 +31,7 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
   const [matchedPairs, setMatchedPairs] = useState(0);
   const [round, setRound] = useState(1);
   const pairTimeout = useRef<number | null>(null);
+  const botMemory = useRef<BotMemory>(new Map());
 
   useEffect(() => animateIn('.score-strip, .memory-status, .memory-grid, .game-actions, .tip'), []);
   useEffect(() => {
@@ -42,24 +52,34 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
   );
 
   useEffect(() => {
-    if (mode !== 'bot' || turn !== 'O' || lock || selected.length || matchedPairs === SYMBOLS.length) return;
-    const timeout = window.setTimeout(() => {
-      const open = cards.map((card, index) => (card.matched ? -1 : index)).filter((index) => index >= 0);
-      if (open.length < 2) return;
-      const [first, second] = chooseBotCards(cards, open, setup.difficulty);
-      const next = cards.map((card, index) => (index === first || index === second ? { ...card, flipped: true } : card));
-      setCards(next);
-      setSelected([first, second]);
-      setLock(true);
-      resolvePair(first, second, next, false);
-    }, 550);
+    if (mode !== 'bot' || turn !== 'O' || lock || selected.length > 1 || matchedPairs === MEMORY_SYMBOLS.length) return;
+    const timeout = window.setTimeout(
+      () => {
+        const first = selected[0] ?? null;
+        const available = getAvailableCards(cards).filter((index) => index !== first);
+        if (!available.length) return;
+        const choice = chooseMemoryBotCard(available, botMemory.current, setup.difficulty, first);
+        const next = revealMemoryCard(cards, choice);
+        botMemory.current = rememberCard(botMemory.current, choice, cards[choice].symbol);
+        setCards(next);
+        if (first === null) {
+          setSelected([choice]);
+        } else {
+          setSelected([first, choice]);
+          setLock(true);
+          resolvePair(first, choice, next, false);
+        }
+      },
+      selected.length ? 450 : 550,
+    );
     return () => window.clearTimeout(timeout);
-  }, [cards, mode, turn, lock, selected.length, matchedPairs]);
+  }, [cards, mode, turn, lock, selected, matchedPairs, setup.difficulty]);
 
   const resetBoard = ({ keepScore = false, advanceRound = false } = {}) => {
     if (pairTimeout.current) window.clearTimeout(pairTimeout.current);
     const nextRound = advanceRound ? round + 1 : keepScore ? round : 1;
-    setCards(createDeck());
+    setCards(createMemoryDeck());
+    botMemory.current = new Map();
     setTurn(getRoundStarter(nextRound));
     if (!keepScore) setScores({ X: 0, O: 0 });
     setRound(nextRound);
@@ -70,25 +90,24 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
   };
 
   useEffect(() => {
-    if (matchedPairs !== SYMBOLS.length || round >= setup.rounds) return;
+    if (matchedPairs !== MEMORY_SYMBOLS.length || round >= setup.rounds) return;
     const timeout = window.setTimeout(() => resetBoard({ keepScore: true, advanceRound: true }), 1600);
     return () => window.clearTimeout(timeout);
   }, [matchedPairs, round, setup.rounds]);
 
-  const resolvePair = (first: number, second: number, currentCards: Card[], humanTurn: boolean) => {
-    const matched = currentCards[first].symbol === currentCards[second].symbol;
+  const resolvePair = (first: number, second: number, currentCards: MemoryCard[], humanTurn: boolean) => {
+    const matched = resolveMemoryPair(currentCards, first, second, turn).matched;
     pairTimeout.current = window.setTimeout(
       () => {
         if (matched) {
-          setCards((current) =>
-            current.map((card, index) => (index === first || index === second ? { ...card, matched: true, matchedBy: turn } : card)),
-          );
+          setCards((current) => resolveMemoryPair(current, first, second, turn).cards);
+          botMemory.current = forgetCards(botMemory.current, [first, second]);
           setScores((current) => ({ ...current, [turn]: current[turn] + 1 }));
           setMatchedPairs((current) => current + 1);
           setLastMatched([first, second]);
           if (humanTurn) triggerHaptic([12, 25, 12]);
         } else {
-          setCards((current) => current.map((card, index) => (index === first || index === second ? { ...card, flipped: false } : card)));
+          setCards((current) => resolveMemoryPair(current, first, second, turn).cards);
           setTurn((current) => (current === 'X' ? 'O' : 'X'));
           if (humanTurn) triggerHaptic(3);
         }
@@ -101,9 +120,10 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
 
   const flip = (index: number) => {
     const card = cards[index];
-    if (lock || card.flipped || card.matched || matchedPairs === SYMBOLS.length || (mode === 'bot' && turn === 'O')) return;
-    const nextCards = cards.map((item, position) => (position === index ? { ...item, flipped: true } : item));
+    if (lock || card.flipped || card.matched || matchedPairs === MEMORY_SYMBOLS.length || (mode === 'bot' && turn === 'O')) return;
+    const nextCards = revealMemoryCard(cards, index);
     const nextSelected = [...selected, index];
+    if (mode === 'bot') botMemory.current = rememberCard(botMemory.current, index, card.symbol);
     setCards(nextCards);
     setSelected(nextSelected);
     triggerHaptic();
@@ -115,7 +135,7 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
     }
   };
 
-  const finished = matchedPairs === SYMBOLS.length;
+  const finished = matchedPairs === MEMORY_SYMBOLS.length;
   const matchComplete = finished && round >= setup.rounds;
   const playerName = (player: Player) => t(player === 'X' ? 'player1' : mode === 'bot' ? 'bot' : 'player2');
   const status = finished
@@ -184,29 +204,4 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
       {matchComplete && <MatchResultOverlay message={status} onComplete={onExit} />}
     </main>
   );
-}
-
-function createDeck(): Card[] {
-  return shuffle([...SYMBOLS, ...SYMBOLS]).map((symbol) => ({ symbol, flipped: false, matched: false, matchedBy: null }));
-}
-function shuffle<T>(items: T[]): T[] {
-  for (let index = items.length - 1; index > 0; index--) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [items[index], items[swapIndex]] = [items[swapIndex], items[index]];
-  }
-  return items;
-}
-
-function chooseBotCards(cards: Card[], open: number[], difficulty: GameSetup['difficulty']): [number, number] {
-  const shouldUseKnownPair = difficulty === 'hard' || (difficulty === 'normal' && Math.random() < 0.6);
-  if (shouldUseKnownPair) {
-    const pair = open.find((first, position) => open.slice(position + 1).some((second) => cards[first].symbol === cards[second].symbol));
-    if (pair !== undefined) {
-      const match = open.find((index) => index !== pair && cards[index].symbol === cards[pair].symbol);
-      if (match !== undefined) return [pair, match];
-    }
-  }
-  const first = open[Math.floor(Math.random() * open.length)];
-  const choices = open.filter((index) => index !== first);
-  return [first, choices[Math.floor(Math.random() * choices.length)]];
 }
