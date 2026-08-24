@@ -1,0 +1,152 @@
+.dots-board-wrap {
+  text-align: center;
+}
+
+.dots-status {
+  min-height: 16px;
+  color: var(--acid);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.dots-box-score {
+  width: min(100%, 420px);
+  margin: 8px auto 10px;
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+.dots-box-score span:first-child {
+  color: var(--acid);
+}
+.dots-box-score span:last-child {
+  color: var(--orange);
+}
+
+.dots-board {
+  --dots-edge-overhang: 15px;
+  width: min(100%, 420px);
+  aspect-ratio: 1;
+  margin: auto;
+  padding: 7px;
+  display: grid;
+  grid-template-columns: 20px 1fr 20px 1fr 20px 1fr 20px 1fr 20px;
+  grid-template-rows: 20px 1fr 20px 1fr 20px 1fr 20px 1fr 20px;
+  align-items: stretch;
+  justify-items: stretch;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface-subtle);
+}
+
+.dots-dot {
+  width: 15px;
+  height: 15px;
+  align-self: center;
+  justify-self: center;
+  position: relative;
+  z-index: 3;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 2px 7px var(--shadow-card);
+}
+
+.dots-edge {
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  z-index: 2;
+  padding: 0;
+  border-radius: 999px;
+  background: transparent;
+}
+.dots-edge::before {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  background: var(--line-strong);
+  transition:
+    background 150ms ease,
+    box-shadow 150ms ease,
+    width 150ms ease,
+    height 150ms ease;
+}
+.dots-edge.horizontal::before {
+  height: 3px;
+  left: calc(var(--dots-edge-overhang) * -1);
+  right: calc(var(--dots-edge-overhang) * -1);
+  top: 50%;
+  transform: translateY(-50%);
+}
+.dots-edge.vertical::before {
+  width: 3px;
+  top: calc(var(--dots-edge-overhang) * -1);
+  bottom: calc(var(--dots-edge-overhang) * -1);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.dots-edge:not(:disabled):hover::before,
+.dots-edge:not(:disabled):focus-visible::before {
+  background: var(--acid);
+  box-shadow: 0 0 10px var(--acid-glow-soft);
+}
+.dots-edge.horizontal:not(:disabled):hover::before,
+.dots-edge.horizontal:not(:disabled):focus-visible::before {
+  height: 5px;
+}
+.dots-edge.vertical:not(:disabled):hover::before,
+.dots-edge.vertical:not(:disabled):focus-visible::before {
+  width: 5px;
+}
+.dots-edge.owner-x::before {
+  background: var(--acid);
+}
+.dots-edge.owner-o::before {
+  background: var(--orange);
+}
+.dots-edge.horizontal.owner-x::before,
+.dots-edge.horizontal.owner-o::before {
+  height: 7px;
+}
+.dots-edge.vertical.owner-x::before,
+.dots-edge.vertical.owner-o::before {
+  width: 7px;
+}
+.dots-edge:disabled {
+  cursor: default;
+}
+
+.dots-box {
+  margin: 3px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: transparent;
+  font-size: clamp(20px, 7vw, 34px);
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+}
+.dots-box.owner-x {
+  color: var(--acid);
+  background: var(--acid-tint);
+}
+.dots-box.owner-o {
+  color: var(--orange);
+  background: var(--orange-wash);
+}
+
+@media (max-width: 370px) {
+  .dots-board {
+    --dots-edge-overhang: 13px;
+    grid-template-columns: 26px 1fr 26px 1fr 26px 1fr 26px;
+    grid-template-rows: 26px 1fr 26px 1fr 26px 1fr 26px;
+    padding: 5px;
+  }
+  .dots-box {
+    margin: 2px;
+  }
+}

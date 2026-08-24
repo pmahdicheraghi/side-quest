@@ -1,0 +1,205 @@
+import { useEffect, useRef, useState } from 'react';
+import anime from 'animejs';
+import { animateIn, motionEnabled } from '../../app/animation';
+import { useI18n } from '../../app/i18n';
+import { triggerHaptic } from '../../app/settings';
+import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
+import { GameActions, GameHeader, MatchResultOverlay, ScoreStrip, Tip } from '../../components/react-layout';
+import {
+  chooseConnectBotColumn,
+  CONNECT_COLUMNS,
+  CONNECT_ROWS,
+  createConnectBoard,
+  dropDisc,
+  getConnectIndex,
+  getConnectResult,
+  getConnectWinningLine,
+  getDropRow,
+  type ConnectCell,
+} from './connect-four-logic';
+import './connect-four.css';
+
+const DROP_ANIMATION_DURATION_MS = 520;
+
+export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: () => void }) {
+  const { language, t } = useI18n();
+  const mode = setup.mode;
+  const [board, setBoard] = useState<ConnectCell[]>(createConnectBoard);
+  const [turn, setTurn] = useState<Player>('X');
+  const [winner, setWinner] = useState<Player | 'draw' | null>(null);
+  const [winningLine, setWinningLine] = useState<number[]>([]);
+  const [lastMove, setLastMove] = useState<number | null>(null);
+  const [isSettling, setIsSettling] = useState(false);
+  const [scores, setScores] = useState<Record<Player, number>>({ X: 0, O: 0 });
+  const [round, setRound] = useState(1);
+  const resultTimeoutRef = useRef<number | null>(null);
+  const numberFormatter = new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en');
+
+  const finishRound = (result: Player | 'draw', finalBoard: ConnectCell[], human: boolean) => {
+    setWinner(result);
+    setWinningLine(getConnectWinningLine(finalBoard) ?? []);
+    if (result !== 'draw') setScores((current) => ({ ...current, [result]: current[result] + 1 }));
+    if (human) triggerHaptic([18, 35, 18]);
+  };
+
+  const settleResult = (result: Player | 'draw', finalBoard: ConnectCell[], human: boolean) => {
+    setIsSettling(true);
+    if (resultTimeoutRef.current !== null) window.clearTimeout(resultTimeoutRef.current);
+    const delay = motionEnabled() ? DROP_ANIMATION_DURATION_MS : 0;
+    resultTimeoutRef.current = window.setTimeout(() => {
+      resultTimeoutRef.current = null;
+      setIsSettling(false);
+      finishRound(result, finalBoard, human);
+    }, delay);
+  };
+
+  useEffect(() => animateIn('.score-strip, .connect-board-wrap, .game-actions, .tip'), []);
+
+  useEffect(() => {
+    if (lastMove === null || !motionEnabled()) return;
+    anime({
+      targets: `.connect-cell[data-index="${lastMove}"] .connect-disc`,
+      translateY: [-70, 0],
+      scale: [0.84, 1],
+      duration: DROP_ANIMATION_DURATION_MS,
+      easing: 'easeOutBounce',
+    });
+  }, [lastMove]);
+
+  useEffect(() => {
+    if (!winningLine.length || !motionEnabled()) return;
+    anime({
+      targets: '.connect-cell.is-winner .connect-disc',
+      scale: [1, 0.82, 1],
+      delay: anime.stagger(85),
+      duration: 520,
+      easing: 'easeOutCubic',
+    });
+  }, [winningLine]);
+
+  useEffect(() => {
+    if (winner || isSettling || mode !== 'bot' || turn !== 'O') return;
+    const timeout = window.setTimeout(() => {
+      const column = chooseConnectBotColumn(board, setup.difficulty);
+      const move = dropDisc(board, column, 'O');
+      if (!move) return;
+      setBoard(move.board);
+      setLastMove(move.index);
+      const result = getConnectResult(move.board);
+      if (result) settleResult(result, move.board, false);
+      else setTurn('X');
+    }, 460);
+    return () => window.clearTimeout(timeout);
+  }, [board, isSettling, mode, setup.difficulty, turn, winner]);
+
+  const resetRound = (advanceRound = false) => {
+    if (resultTimeoutRef.current !== null) window.clearTimeout(resultTimeoutRef.current);
+    resultTimeoutRef.current = null;
+    const nextRound = advanceRound ? round + 1 : round;
+    if (advanceRound) setRound(nextRound);
+    setBoard(createConnectBoard());
+    setTurn(getRoundStarter(nextRound));
+    setWinner(null);
+    setWinningLine([]);
+    setLastMove(null);
+    setIsSettling(false);
+  };
+
+  useEffect(
+    () => () => {
+      if (resultTimeoutRef.current !== null) window.clearTimeout(resultTimeoutRef.current);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!winner || round >= setup.rounds) return;
+    const timeout = window.setTimeout(() => resetRound(true), 1500);
+    return () => window.clearTimeout(timeout);
+  }, [round, setup.rounds, winner]);
+
+  const playColumn = (column: number) => {
+    if (winner || isSettling || (mode === 'bot' && turn === 'O')) return;
+    const move = dropDisc(board, column, turn);
+    if (!move) return;
+    setBoard(move.board);
+    setLastMove(move.index);
+    triggerHaptic();
+    const result = getConnectResult(move.board);
+    if (result) settleResult(result, move.board, true);
+    else setTurn(turn === 'X' ? 'O' : 'X');
+  };
+
+  const matchComplete = Boolean(winner) && round >= setup.rounds;
+  const playerName = (player: Player) => t(player === 'X' ? 'player1' : mode === 'bot' ? 'bot' : 'player2');
+  const status = isSettling
+    ? t('connectDiscSettling')
+    : winner
+      ? matchComplete
+        ? scores.X === scores.O
+          ? t('matchDraw')
+          : t('winsMatch', { player: playerName(scores.X > scores.O ? 'X' : 'O') })
+        : winner === 'draw'
+          ? t('drawRound')
+          : t('takesRound', { player: playerName(winner) })
+      : t('playerTurn', { player: playerName(turn) });
+
+  return (
+    <main className="shell game-screen connect-screen">
+      <GameHeader
+        title={t('connectFour')}
+        statIcon="grid"
+        statLabel={t('roundLabel')}
+        statValue={numberFormatter.format(round)}
+        statSuffix={<small>/ {numberFormatter.format(setup.rounds)}</small>}
+        onExit={onExit}
+      />
+      <ScoreStrip leftLabel={t('player1')} leftMark="●" rightLabel={t(mode === 'bot' ? 'bot' : 'player2')} rightMark="●" scores={scores} />
+      <section className="connect-board-wrap">
+        <div className="turn-label" role="status" aria-live="polite">
+          {status}
+        </div>
+        <div className="connect-board" role="group" aria-label={t('connectBoard')}>
+          {Array.from({ length: CONNECT_COLUMNS }, (_, column) => {
+            const targetRow = getDropRow(board, column);
+            return (
+              <button
+                type="button"
+                className="connect-column"
+                key={column}
+                onClick={() => playColumn(column)}
+                disabled={targetRow === null || Boolean(winner) || isSettling || (mode === 'bot' && turn === 'O')}
+                aria-label={t(targetRow === null ? 'connectColumnFull' : 'connectDropColumn', {
+                  column: numberFormatter.format(column + 1),
+                })}
+              >
+                {Array.from({ length: CONNECT_ROWS }, (_, row) => {
+                  const index = getConnectIndex(row, column);
+                  const mark = board[index];
+                  return (
+                    <span
+                      className={`connect-cell ${mark.toLowerCase()} ${winningLine.includes(index) ? 'is-winner' : ''} ${row === targetRow ? 'is-target' : ''}`}
+                      data-index={index}
+                      key={row}
+                      aria-hidden="true"
+                    >
+                      {mark && <span className="connect-disc" />}
+                    </span>
+                  );
+                })}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+      <GameActions
+        resetLabel={t(matchComplete ? 'matchComplete' : winner ? 'nextRoundStarting' : 'resetBoard')}
+        onReset={() => resetRound(Boolean(winner))}
+        onExit={onExit}
+        resetDisabled={Boolean(winner) || isSettling}
+      />
+      <Tip>{t('connectTip')}</Tip>
+      {matchComplete && <MatchResultOverlay message={status} onComplete={onExit} />}
+    </main>
+  );
+}

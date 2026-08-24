@@ -1,0 +1,104 @@
+.reaction-arena {
+  min-height: 230px;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 17px;
+  margin: auto;
+  width: min(100%, 350px);
+  background: linear-gradient(160deg, var(--reaction-arena-start), var(--reaction-arena-end));
+  transition: background 0.25s;
+}
+.reaction-arena.phase-go {
+  background: linear-gradient(160deg, var(--reaction-go-start), var(--reaction-go-end));
+}
+.signal-orb {
+  width: 108px;
+  height: 108px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--acid-border);
+  border-radius: 50%;
+  color: var(--acid);
+  background: var(--acid-wash);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.signal-orb.signal-go {
+  color: var(--reaction-go-ink);
+  background: var(--acid);
+  border-color: var(--acid);
+  box-shadow:
+    0 0 0 12px var(--acid-tint),
+    0 0 42px var(--acid-glow);
+  font-size: 18px;
+}
+.reaction-status {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.phase-go .reaction-status {
+  color: var(--acid);
+}
+.reaction-times {
+  display: flex;
+  gap: 50px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.reaction-times span:first-child {
+  color: var(--acid);
+}
+.reaction-times span:last-child {
+  color: var(--orange);
+}
+.reaction-buttons {
+  margin: auto;
+  width: min(100%, 350px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.reaction-player {
+  min-height: 82px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 10px;
+  color: var(--reaction-player-one-ink);
+  background: var(--acid);
+}
+.reaction-player.player-two {
+  background: var(--orange);
+  color: var(--reaction-player-two-ink);
+}
+.reaction-player:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.reaction-player span,
+.reaction-player small {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+}
+.reaction-player strong {
+  font-size: 22px;
+  letter-spacing: -0.06em;
+}
+.reaction-player small {
+  opacity: 0.68;
+}

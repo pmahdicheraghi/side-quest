@@ -1,0 +1,357 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+
+export type Language = 'en' | 'fa';
+
+const en = {
+  appName: 'Side Quest',
+  backToMenu: 'Back to game menu',
+  openSettings: 'Open settings',
+  online: 'Online',
+  offline: 'Offline',
+  pocketArcade: 'Pocket arcade',
+  heroSmallGames: 'Small games.',
+  heroBigEnergy: 'Big energy.',
+  heroIntro: 'Quick rounds for wherever you are. Pick a quest and pass the phone.',
+  installApp: 'Install Game',
+  chooseGame: 'Choose a game',
+  logic: '01 / Logic',
+  ticTacToe: 'Tic Tac Toe',
+  ticDescription: 'Classic strategy, zero waiting.',
+  twoPlayers: '2 players',
+  vsBot: 'vs bot',
+  memory: '02 / Memory',
+  memoryMatch: 'Memory Match',
+  memoryDescription: 'Flip cards. Find pairs. Stay sharp.',
+  eightPairs: '8 pairs',
+  passAndPlay: 'pass & play',
+  reflex: '03 / Reflex',
+  reactionDuel: 'Reaction Duel',
+  reactionDescription: 'Wait for green. Tap first. Win fast.',
+  splitSeconds: 'split seconds',
+  headToHead: 'head to head',
+  alignment: '04 / Alignment',
+  connectFour: 'Connect Four',
+  connectDescription: 'Drop discs. Build a line. Block theirs.',
+  fourToWin: '4 to win',
+  tactics: '05 / Tactics',
+  dotsBoxes: 'Dots & Boxes',
+  dotsDescription: 'Claim edges. Close boxes. Build a chain.',
+  nineBoxes: '9 boxes',
+  chainTactics: 'chain tactics',
+  footerTagline: 'Two-minute breaks, maximum fun',
+  byMahdi: 'By Mahdi for Zeinab',
+  version: 'v1.2',
+  newQuest: 'New quest',
+  setupGame: 'Set up {game}',
+  setupIntro: 'Choose your challenge before the first round.',
+  closeSetup: 'Close game setup',
+  botDifficulty: 'Bot difficulty',
+  easy: 'Easy',
+  easyHint: 'A relaxed opponent',
+  normal: 'Normal',
+  normalHint: 'A balanced challenge',
+  hard: 'Hard',
+  hardHint: 'Bring your best game',
+  difficultyNote: 'Difficulty applies when playing against the bot.',
+  numberOfRounds: 'Number of rounds',
+  round: 'round',
+  rounds: 'rounds',
+  cancel: 'Cancel',
+  startGame: 'Start game',
+  settings: 'Settings',
+  yourArcade: 'Your arcade',
+  makeIt: 'Make it',
+  yours: 'yours.',
+  settingsIntro: 'Small preferences for more comfortable rounds.',
+  gamePreferences: 'Game preferences',
+  animations: 'Animations',
+  animationsDescription: 'Motion and game transitions',
+  musicSetting: 'Music',
+  musicDescription: 'Side Quest soundtrack during play',
+  haptics: 'Haptics',
+  hapticsDescription: 'Small vibrations for game feedback',
+  highContrast: 'High contrast',
+  highContrastDescription: 'Stronger borders and readable muted text',
+  language: 'Language',
+  languageDescription: 'Choose the language of the game',
+  english: 'English',
+  persian: 'Persian',
+  on: 'On',
+  off: 'Off',
+  settingsNote: 'The soundtrack loops softly in the background. Your preferences are saved automatically.',
+  backToMenuAction: 'Back to menu',
+  gameMode: 'Game mode',
+  player1: 'Player 1',
+  player2: 'Player 2',
+  bot: 'Bot',
+  versus: 'VS',
+  quitToMenu: 'Quit to menu',
+  tip: 'TIP',
+  matchComplete: 'Match complete',
+  returningToMenu: 'Returning to game menu…',
+  nextRoundStarting: 'Next round starting…',
+  restartMatch: 'Restart match',
+  resetBoard: 'Reset board',
+  startRound: 'Start round',
+  roundRunning: 'Round running',
+  roundLabel: 'Round',
+  playerTurn: '{player}’s turn',
+  drawRound: 'It’s a draw!',
+  takesRound: '{player} takes the round!',
+  matchDraw: 'The match ends in a draw!',
+  winsMatch: '{player} wins the match!',
+  ticBoard: 'Tic Tac Toe board',
+  cellEmpty: 'Cell {cell}, empty',
+  cellMarked: 'Cell {cell}, {player} marked',
+  cellWinning: 'Cell {cell}, {player} marked, winning line',
+  ticTip: 'Take the corners. They’re worth more than they look.',
+  checkingPair: 'Checking the pair…',
+  flipTwo: '{player}’s turn — flip two cards.',
+  deckComplete: 'Deck complete — ready for the next round.',
+  matchTie: 'The match ends in a tie!',
+  memoryCards: 'Memory cards',
+  cardMatched: 'Card {card}, matched {symbol}',
+  cardShown: 'Card {card}, {symbol}',
+  cardDown: 'Card {card}, face down',
+  memoryTip: 'Remember the edges. They’re easiest to lose.',
+  getReady: 'Get ready… don’t tap yet.',
+  tapNow: 'TAP NOW!',
+  go: 'GO',
+  tappedEarly: '{player} tapped early. {winner} wins the round.',
+  winsRound: '{player} wins this round.',
+  pressStart: 'Press start when you’re ready.',
+  waitForGreen: 'Wait for green',
+  tapNowShort: 'Tap now',
+  tooEarly: 'Too early',
+  wins: 'Wins',
+  noTap: 'No tap',
+  ready: 'Ready',
+  reactionTimes: 'Reaction times',
+  milliseconds: 'ms',
+  playerTapButtons: 'Player tap buttons',
+  tap: 'TAP!',
+  reactionTip: 'Don’t chase the signal. Let it come to you.',
+  connectBoard: 'Connect Four board',
+  connectDropColumn: 'Drop a disc in column {column}',
+  connectColumnFull: 'Column {column} is full',
+  connectDiscSettling: 'Disc falling…',
+  connectTip: 'Control the center. It creates more paths to four.',
+  dotsBoard: 'Dots and Boxes board',
+  dotsBoxScore: 'Boxes claimed this round',
+  dotsHorizontalEdge: 'Horizontal edge at row {row}, column {column}',
+  dotsVerticalEdge: 'Vertical edge at row {row}, column {column}',
+  dotsEdgeClaimed: 'Edge claimed by {player}',
+  dotsCounting: 'Counting the boxes…',
+  claimsBox: '{player} claims a box and plays again!',
+  claimsBoxes: '{player} claims {count} boxes and plays again!',
+  dotsTip: 'Avoid drawing the third side unless you can control the chain.',
+} as const;
+
+export type TranslationKey = keyof typeof en;
+
+const fa: Record<TranslationKey, string> = {
+  appName: 'ساید کوئست',
+  backToMenu: 'بازگشت به فهرست بازی‌ها',
+  openSettings: 'باز کردن تنظیمات',
+  online: 'آنلاین',
+  offline: 'آفلاین',
+  pocketArcade: 'بازی‌های جیبی',
+  heroSmallGames: 'بازی‌های کوچک.',
+  heroBigEnergy: 'هیجان بزرگ.',
+  heroIntro: 'هر جا که هستید یک دور کوتاه بازی کنید؛ بازی را انتخاب کنید و گوشی را دست‌به‌دست کنید.',
+  installApp: 'نصب بازی',
+  chooseGame: 'انتخاب بازی',
+  logic: '۰۱ / منطق',
+  ticTacToe: 'دوز',
+  ticDescription: 'استراتژی کلاسیک، بدون معطلی.',
+  twoPlayers: '۲ بازیکن',
+  vsBot: 'مقابل ربات',
+  memory: '۰۲ / حافظه',
+  memoryMatch: 'بازی حافظه',
+  memoryDescription: 'کارت‌ها را برگردانید، جفت‌ها را پیدا کنید و حواستان را جمع نگه دارید.',
+  eightPairs: '۸ جفت',
+  passAndPlay: 'بازی نوبتی',
+  reflex: '۰۳ / واکنش',
+  reactionDuel: 'دوئل واکنش',
+  reactionDescription: 'منتظر سبز بمانید؛ زودتر ضربه بزنید و برنده شوید.',
+  splitSeconds: 'کسری از ثانیه',
+  headToHead: 'رقابت دونفره',
+  alignment: '۰۴ / چینش',
+  connectFour: 'چهار در یک ردیف',
+  connectDescription: 'مهره بیندازید، ردیف بسازید و راه حریف را ببندید.',
+  fourToWin: '۴ مهره برای برد',
+  tactics: '۰۵ / تاکتیک',
+  dotsBoxes: 'نقطه‌ها و مربع‌ها',
+  dotsDescription: 'خط بکشید، مربع‌ها را ببندید و زنجیره بسازید.',
+  nineBoxes: '۹ مربع',
+  chainTactics: 'تاکتیک زنجیره‌ای',
+  footerTagline: 'استراحتی کوتاه، هیجانی بزرگ',
+  byMahdi: 'ساختهٔ مهدی برای زینب',
+  version: 'نسخهٔ ۱.۲',
+  newQuest: 'مرحلهٔ تازه',
+  setupGame: 'تنظیم {game}',
+  setupIntro: 'پیش از دور اول، سطح چالش را انتخاب کنید.',
+  closeSetup: 'بستن تنظیمات بازی',
+  botDifficulty: 'سختی ربات',
+  easy: 'آسان',
+  easyHint: 'حریفی برای بازی آرام',
+  normal: 'معمولی',
+  normalHint: 'چالشی متعادل',
+  hard: 'سخت',
+  hardHint: 'بهترین بازی‌تان را نشان دهید',
+  difficultyNote: 'درجهٔ سختی فقط هنگام بازی با ربات اعمال می‌شود.',
+  numberOfRounds: 'تعداد دورها',
+  round: 'دور',
+  rounds: 'دور',
+  cancel: 'لغو',
+  startGame: 'شروع بازی',
+  settings: 'تنظیمات',
+  yourArcade: 'بازی به سبک شما',
+  makeIt: 'آن را',
+  yours: 'شخصی کنید.',
+  settingsIntro: 'تنظیمات کوچک برای دورهای راحت‌تر.',
+  gamePreferences: 'تنظیمات بازی',
+  animations: 'پویانمایی‌ها',
+  animationsDescription: 'حرکت‌ها و جابه‌جایی‌های بازی',
+  musicSetting: 'موسیقی',
+  musicDescription: 'موسیقی ساید کوئست هنگام بازی',
+  haptics: 'لرزش',
+  hapticsDescription: 'لرزش‌های کوتاه برای بازخورد بازی',
+  highContrast: 'کنتراست بالا',
+  highContrastDescription: 'خطوط پررنگ‌تر و متن خواناتر',
+  language: 'زبان',
+  languageDescription: 'زبان بازی را انتخاب کنید',
+  english: 'English',
+  persian: 'فارسی',
+  on: 'روشن',
+  off: 'خاموش',
+  settingsNote: 'موسیقی به‌آرامی در پس‌زمینه تکرار می‌شود. تنظیمات شما به‌صورت خودکار ذخیره می‌شود.',
+  backToMenuAction: 'بازگشت به فهرست',
+  gameMode: 'حالت بازی',
+  player1: 'بازیکن ۱',
+  player2: 'بازیکن ۲',
+  bot: 'ربات',
+  versus: 'در برابر',
+  quitToMenu: 'خروج به فهرست',
+  tip: 'نکته',
+  matchComplete: 'مسابقه تمام شد',
+  returningToMenu: 'در حال بازگشت به فهرست بازی‌ها…',
+  nextRoundStarting: 'دور بعدی در حال شروع…',
+  restartMatch: 'شروع دوبارهٔ مسابقه',
+  resetBoard: 'بازنشانی صفحه',
+  startRound: 'شروع دور',
+  roundRunning: 'دور در حال اجراست',
+  roundLabel: 'دور',
+  playerTurn: 'نوبت {player}',
+  drawRound: 'این دور مساوی شد!',
+  takesRound: '{player} این دور را برد!',
+  matchDraw: 'مسابقه مساوی تمام شد!',
+  winsMatch: '{player} برندهٔ مسابقه شد!',
+  ticBoard: 'صفحهٔ بازی دوز',
+  cellEmpty: 'خانهٔ {cell}، خالی',
+  cellMarked: 'خانهٔ {cell}، علامت‌گذاری‌شده توسط {player}',
+  cellWinning: 'خانهٔ {cell}، علامت‌گذاری‌شده توسط {player}، خط برنده',
+  ticTip: 'گوشه‌ها را بگیرید؛ ارزششان بیشتر از چیزی است که به نظر می‌رسد.',
+  checkingPair: 'در حال بررسی جفت…',
+  flipTwo: 'نوبت {player} است — دو کارت را برگردانید.',
+  deckComplete: 'کارت‌ها تمام شدند — دور بعدی آماده است.',
+  matchTie: 'مسابقه مساوی تمام شد!',
+  memoryCards: 'کارت‌های بازی حافظه',
+  cardMatched: 'کارت {card}، جفت‌شده با نماد {symbol}',
+  cardShown: 'کارت {card}، {symbol}',
+  cardDown: 'کارت {card}، پشت‌ورو',
+  memoryTip: 'لبه‌ها را به خاطر بسپارید؛ فراموش کردنشان آسان‌تر است.',
+  getReady: 'آماده باشید… هنوز ضربه نزنید.',
+  tapNow: 'همین حالا بزن!',
+  go: 'بزن',
+  tappedEarly: '{player} زود ضربه زد. {winner} این دور را برد.',
+  winsRound: '{player} این دور را برد.',
+  pressStart: 'هر وقت آماده بودید، شروع را بزنید.',
+  waitForGreen: 'منتظر سبز بمانید',
+  tapNowShort: 'همین حالا بزنید',
+  tooEarly: 'خیلی زود',
+  wins: 'برنده',
+  noTap: 'بدون ضربه',
+  ready: 'آماده',
+  reactionTimes: 'زمان واکنش‌ها',
+  milliseconds: 'میلی‌ثانیه',
+  playerTapButtons: 'دکمه‌های ضربهٔ بازیکنان',
+  tap: 'بزن!',
+  reactionTip: 'دنبال علامت ندوید؛ بگذارید خودش ظاهر شود.',
+  connectBoard: 'صفحهٔ بازی چهار در یک ردیف',
+  connectDropColumn: 'انداختن مهره در ستون {column}',
+  connectColumnFull: 'ستون {column} پر است',
+  connectDiscSettling: 'مهره در حال افتادن است…',
+  connectTip: 'مرکز را در اختیار بگیرید؛ مسیرهای بیشتری برای ساختن چهار مهره می‌دهد.',
+  dotsBoard: 'صفحهٔ نقطه‌ها و مربع‌ها',
+  dotsBoxScore: 'مربع‌های گرفته‌شده در این دور',
+  dotsHorizontalEdge: 'خط افقی در ردیف {row}، ستون {column}',
+  dotsVerticalEdge: 'خط عمودی در ردیف {row}، ستون {column}',
+  dotsEdgeClaimed: 'خط گرفته‌شده توسط {player}',
+  dotsCounting: 'در حال شمردن مربع‌ها…',
+  claimsBox: '{player} یک مربع می‌گیرد و دوباره بازی می‌کند!',
+  claimsBoxes: '{player} تعداد {count} مربع می‌گیرد و دوباره بازی می‌کند!',
+  dotsTip: 'ضلع سوم را نکشید، مگر اینکه بتوانید زنجیره را کنترل کنید.',
+};
+
+const dictionaries: Record<Language, Record<TranslationKey, string>> = { en, fa };
+const LANGUAGE_STORAGE_KEY = 'side-quest-language';
+
+function interpolate(template: string, variables?: Record<string, string | number>): string {
+  if (!variables) return template;
+  return template.replace(/\{(\w+)\}/g, (_, key: string) => String(variables[key] ?? `{${key}}`));
+}
+
+export function translate(language: Language, key: TranslationKey, variables?: Record<string, string | number>): string {
+  return interpolate(dictionaries[language][key] ?? en[key], variables);
+}
+
+function loadLanguage(): Language {
+  try {
+    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (stored === 'en' || stored === 'fa') return stored;
+  } catch {
+    // Fall back to English if browser storage is unavailable.
+  }
+  return 'en';
+}
+
+type I18nContextValue = {
+  language: Language;
+  setLanguage: (language: Language) => void;
+  t: (key: TranslationKey, variables?: Record<string, string | number>) => string;
+};
+
+const I18nContext = createContext<I18nContextValue | null>(null);
+
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const [language, setLanguageState] = useState<Language>(loadLanguage);
+  const setLanguage = useCallback((nextLanguage: Language) => {
+    setLanguageState(nextLanguage);
+    try {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage);
+    } catch {
+      // Language still applies for the current session when storage is unavailable.
+    }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === 'fa' ? 'rtl' : 'ltr';
+    document.title = translate(language, 'appName');
+  }, [language]);
+
+  const t = useCallback(
+    (key: TranslationKey, variables?: Record<string, string | number>) => translate(language, key, variables),
+    [language],
+  );
+  const value = useMemo(() => ({ language, setLanguage, t }), [language, setLanguage, t]);
+
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+}
+
+export function useI18n(): I18nContextValue {
+  const context = useContext(I18nContext);
+  if (!context) throw new Error('useI18n must be used inside I18nProvider.');
+  return context;
+}
