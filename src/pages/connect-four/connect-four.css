@@ -26,10 +26,6 @@
   background: transparent;
 }
 
-.connect-column:not(:disabled):hover {
-  background: var(--surface-faint);
-}
-
 .connect-column:disabled {
   cursor: default;
 }
@@ -72,9 +68,18 @@
   transition: opacity 150ms ease;
 }
 
-.connect-column:not(:disabled):hover .connect-cell.is-target::after,
 .connect-column:focus-visible .connect-cell.is-target::after {
   opacity: 0.42;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .connect-column:not(:disabled):hover {
+    background: var(--surface-faint);
+  }
+
+  .connect-column:not(:disabled):hover .connect-cell.is-target::after {
+    opacity: 0.42;
+  }
 }
 
 .connect-cell.is-winner .connect-disc {

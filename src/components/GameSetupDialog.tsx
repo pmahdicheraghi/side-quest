@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import type { GameDifficulty, GameRounds, GameSetup } from '../app/types';
-import { Icon, ModeToggle } from './react-layout';
+import { Icon } from './react-layout';
 import { useI18n, type TranslationKey } from '../app/i18n';
 
-const DIFFICULTIES: Array<{ value: GameDifficulty; label: TranslationKey; hint: TranslationKey }> = [
-  { value: 'easy', label: 'easy', hint: 'easyHint' },
-  { value: 'normal', label: 'normal', hint: 'normalHint' },
-  { value: 'hard', label: 'hard', hint: 'hardHint' },
+type PlayOption = GameDifficulty | 'two';
+
+const PLAY_OPTIONS: Array<{ value: PlayOption; label: TranslationKey }> = [
+  { value: 'two', label: 'twoPlayers' },
+  { value: 'easy', label: 'easyBot' },
+  { value: 'normal', label: 'normalBot' },
+  { value: 'hard', label: 'hardBot' },
 ];
 const ROUND_OPTIONS: GameRounds[] = [1, 3, 5];
 
@@ -23,8 +26,7 @@ export function GameSetupDialog({
 }): ReactElement {
   const { language, t } = useI18n();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [mode, setMode] = useState(initialSetup.mode);
-  const [difficulty, setDifficulty] = useState(initialSetup.difficulty);
+  const [playOption, setPlayOption] = useState<PlayOption>(initialSetup.mode === 'two' ? 'two' : initialSetup.difficulty);
   const [rounds, setRounds] = useState(initialSetup.rounds);
 
   useEffect(() => {
@@ -56,26 +58,22 @@ export function GameSetupDialog({
 
         <fieldset className="setup-fieldset">
           <legend>{t('gameMode')}</legend>
-          <ModeToggle mode={mode} onChange={setMode} />
-        </fieldset>
-
-        <fieldset className="setup-fieldset">
-          <legend>{t('botDifficulty')}</legend>
-          <div className="setup-options difficulty-options">
-            {DIFFICULTIES.map((option) => (
+          <div className="setup-options play-options">
+            {PLAY_OPTIONS.map((option) => (
               <button
                 type="button"
-                className={`setup-option ${difficulty === option.value ? 'is-selected' : ''}`}
-                aria-pressed={difficulty === option.value}
+                className={`setup-option play-option play-option-${option.value === 'two' ? 'two' : 'bot'} ${playOption === option.value ? 'is-selected' : ''}`}
+                aria-pressed={playOption === option.value}
                 key={option.value}
-                onClick={() => setDifficulty(option.value)}
+                onClick={() => setPlayOption(option.value)}
               >
-                <strong>{t(option.label)}</strong>
-                <small>{t(option.hint)}</small>
+                <Icon name={option.value === 'two' ? 'users' : 'bot'} />
+                <span>
+                  <strong>{t(option.label)}</strong>
+                </span>
               </button>
             ))}
           </div>
-          <small className="setup-note">{t('difficultyNote')}</small>
         </fieldset>
 
         <fieldset className="setup-fieldset">
@@ -100,7 +98,18 @@ export function GameSetupDialog({
           <button type="button" className="text-btn" onClick={onCancel}>
             {t('cancel')}
           </button>
-          <button type="button" className="primary-btn" onClick={() => onStart({ mode, difficulty, rounds })} autoFocus>
+          <button
+            type="button"
+            className="primary-btn"
+            onClick={() =>
+              onStart({
+                mode: playOption === 'two' ? 'two' : 'bot',
+                difficulty: playOption === 'two' ? initialSetup.difficulty : playOption,
+                rounds,
+              })
+            }
+            autoFocus
+          >
             {t('startGame')} <Icon name="arrow" />
           </button>
         </div>

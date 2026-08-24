@@ -6,13 +6,18 @@ import type { GameSetup, Player } from '../../app/types';
 import { GameActions, GameHeader, MatchResultOverlay, ScoreStrip, Tip } from '../../components/react-layout';
 import './reaction-duel.css';
 import { useI18n } from '../../app/i18n';
-
-type Phase = 'idle' | 'waiting' | 'go' | 'result';
+import {
+  getBotReactionDelay,
+  getReactionMatchWinner,
+  getReactionWaitDelay,
+  resolveReactionAttempt,
+  type ReactionPhase,
+} from './reaction-duel-logic';
 
 export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: () => void }) {
   const { language, t } = useI18n();
   const mode = setup.mode;
-  const [phase, setPhase] = useState<Phase>('idle');
+  const [phase, setPhase] = useState<ReactionPhase>('idle');
   const [scores, setScores] = useState<Record<Player, number>>({ X: 0, O: 0 });
   const [reactions, setReactions] = useState<Partial<Record<Player, number>>>({});
   const [winner, setWinner] = useState<Player | null>(null);
@@ -26,22 +31,18 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
   useEffect(() => () => stopTimers(), []);
   useEffect(() => {
     if (phase !== 'waiting') return;
-    timer.current = window.setTimeout(
-      () => {
-        setPhase('go');
-        goAt.current = performance.now();
-        if (motionEnabled()) anime({ targets: '.signal-orb', scale: [0.8, 1.12, 1], duration: 360, easing: 'easeOutBack' });
-      },
-      1200 + Math.random() * 1800,
-    );
+    timer.current = window.setTimeout(() => {
+      setPhase('go');
+      goAt.current = performance.now();
+      if (motionEnabled()) anime({ targets: '.signal-orb', scale: [0.8, 1.12, 1], duration: 360, easing: 'easeOutBack' });
+    }, getReactionWaitDelay());
     return () => {
       if (timer.current) window.clearTimeout(timer.current);
     };
   }, [phase]);
   useEffect(() => {
     if (phase !== 'go' || mode !== 'bot') return;
-    const [minimum, variance] = botReactionRange(setup.difficulty);
-    botTimer.current = window.setTimeout(() => tap('O'), minimum + Math.random() * variance);
+    botTimer.current = window.setTimeout(() => tap('O'), getBotReactionDelay(setup.difficulty));
     return () => {
       if (botTimer.current) window.clearTimeout(botTimer.current);
     };
@@ -71,22 +72,21 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
   }, [phase, round, setup.rounds]);
 
   const tap = (player: Player) => {
-    if (phase === 'waiting') {
+    const attempt = resolveReactionAttempt(phase, player, goAt.current, performance.now(), Boolean(reactions[player]));
+    if (attempt.kind === 'false-start') {
       if (!(mode === 'bot' && player === 'O')) triggerHaptic([28, 40, 28]);
-      const nextWinner = player === 'X' ? 'O' : 'X';
-      setFalseStart(player);
-      setWinner(nextWinner);
+      setFalseStart(attempt.falseStart);
+      setWinner(attempt.winner);
       setPhase('result');
       stopTimers();
-      setScores((current) => ({ ...current, [nextWinner]: current[nextWinner] + 1 }));
+      setScores((current) => ({ ...current, [attempt.winner]: current[attempt.winner] + 1 }));
       return;
     }
-    if (phase !== 'go' || reactions[player]) return;
-    const reaction = Math.max(1, Math.round(performance.now() - goAt.current));
+    if (attempt.kind !== 'reaction') return;
     if (!(mode === 'bot' && player === 'O')) triggerHaptic([18, 35, 18]);
-    setReactions((current) => ({ ...current, [player]: reaction }));
-    setWinner(player);
-    setScores((current) => ({ ...current, [player]: current[player] + 1 }));
+    setReactions((current) => ({ ...current, [player]: attempt.reaction }));
+    setWinner(attempt.winner);
+    setScores((current) => ({ ...current, [attempt.winner]: current[attempt.winner] + 1 }));
     setPhase('result');
     stopTimers();
   };
@@ -95,8 +95,11 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
   const playerName = (player: Player) => t(player === 'X' ? 'player1' : mode === 'bot' ? 'bot' : 'player2');
   const formatReaction = (reaction: number) =>
     `${new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(reaction)} ${t('milliseconds')}`;
+  const matchWinner = getReactionMatchWinner(scores);
   const status = matchComplete
-    ? t('winsMatch', { player: playerName(scores.X > scores.O ? 'X' : 'O') })
+    ? matchWinner === 'draw'
+      ? t('matchDraw')
+      : t('winsMatch', { player: playerName(matchWinner) })
     : phase === 'waiting'
       ? t('getReady')
       : phase === 'go'
@@ -199,10 +202,4 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
       {matchComplete && <MatchResultOverlay message={status} onComplete={onExit} />}
     </main>
   );
-}
-
-function botReactionRange(difficulty: GameSetup['difficulty']): [number, number] {
-  if (difficulty === 'easy') return [560, 360];
-  if (difficulty === 'hard') return [180, 170];
-  return [320, 300];
 }

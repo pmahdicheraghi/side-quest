@@ -14,7 +14,7 @@ export type BotMemory = ReadonlyMap<number, string>;
 const KNOWN_PAIR_CHANCE: Record<GameDifficulty, number> = {
   easy: 0.35,
   normal: 0.7,
-  hard: 1,
+  hard: 0.95,
 };
 
 export function createMemoryDeck(random: () => number = Math.random): MemoryCard[] {

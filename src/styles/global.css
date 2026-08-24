@@ -272,36 +272,6 @@ p {
 .game-screen {
   padding-top: 19px;
 }
-.mode-toggle {
-  display: flex;
-  gap: 5px;
-  padding: 5px;
-  background: var(--surface-tint);
-  border-radius: 10px;
-  margin: 34px 0 20px;
-}
-.mode-btn {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  background: var(--surface-clear);
-  border-radius: 7px;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  padding: 10px;
-}
-.mode-btn.active {
-  background: var(--panel-2);
-  color: var(--acid);
-  box-shadow: 0 2px 8px var(--shadow-soft);
-}
-.mode-btn .icon {
-  width: 15px;
-  height: 15px;
-}
 .score-strip {
   gap: 16px;
   margin-top: 34px;

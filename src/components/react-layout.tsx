@@ -1,6 +1,5 @@
 import { useEffect, type CSSProperties, type ReactNode } from 'react';
 import { iconPaths } from '../app/icons';
-import type { GameMode } from '../app/types';
 import { useI18n } from '../app/i18n';
 
 export function Icon({ name, className = 'icon' }: { name: string; className?: string }) {
@@ -48,32 +47,6 @@ export function GameHeader({
         {statSuffix}
       </div>
     </header>
-  );
-}
-
-export function ModeToggle({ mode, onChange }: { mode: GameMode; onChange: (mode: GameMode) => void }) {
-  const { t } = useI18n();
-  return (
-    <div className="mode-toggle" role="group" aria-label={t('gameMode')}>
-      <button
-        type="button"
-        className={`mode-btn ${mode === 'bot' ? 'active' : ''}`}
-        aria-pressed={mode === 'bot'}
-        onClick={() => onChange('bot')}
-      >
-        <Icon name="bot" />
-        <span>{t('vsBot')}</span>
-      </button>
-      <button
-        type="button"
-        className={`mode-btn ${mode === 'two' ? 'active' : ''}`}
-        aria-pressed={mode === 'two'}
-        onClick={() => onChange('two')}
-      >
-        <Icon name="users" />
-        <span>{t('twoPlayers')}</span>
-      </button>
-    </div>
   );
 }
 

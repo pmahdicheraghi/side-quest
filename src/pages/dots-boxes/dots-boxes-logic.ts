@@ -76,7 +76,10 @@ export function chooseDotsBotEdge(
   if (safeEdges.length) return randomChoice(safeEdges, random);
   if (difficulty === 'normal') return randomChoice(available, random);
 
-  const risks = available.map((edge) => ({ edge, risk: giveawayRisk(edges, boxes, edge) }));
+  // Every remaining move opens a box. Look through the complete capture run that
+  // each move gives the opponent and sacrifice the fewest boxes possible.
+  const captureMemo = new Map<string, number>();
+  const risks = available.map((edge) => ({ edge, risk: forcedOpponentCaptures(edges, boxes, edge, captureMemo) }));
   const lowestRisk = Math.min(...risks.map(({ risk }) => risk));
   return randomChoice(
     risks.filter(({ risk }) => risk === lowestRisk).map(({ edge }) => edge),
@@ -93,12 +96,32 @@ function isSafeMove(edges: DotEdges, boxes: DotBoxes, edge: DotEdge): boolean {
   return getAdjacentBoxes(edge).every((boxIndex) => boxes[boxIndex] || countBoxSides(edges, boxIndex) <= 1);
 }
 
-function giveawayRisk(edges: DotEdges, boxes: DotBoxes, edge: DotEdge): number {
+function forcedOpponentCaptures(edges: DotEdges, boxes: DotBoxes, edge: DotEdge, memo: Map<string, number>): number {
   const nextEdges = { ...edges, [edge]: 'O' as Player };
-  return boxes.reduce((risk, owner, boxIndex) => {
-    if (owner || countBoxSides(nextEdges, boxIndex) !== 3) return risk;
-    return risk + 1;
-  }, 0);
+  return maxCaptureRun(nextEdges, boxes, memo);
+}
+
+function maxCaptureRun(edges: DotEdges, boxes: DotBoxes, memo: Map<string, number>): number {
+  const key = `${ALL_DOT_EDGES.map((edge) => (edges[edge] ? '1' : '0')).join('')}:${boxes.map((owner) => (owner ? '1' : '0')).join('')}`;
+  const cached = memo.get(key);
+  if (cached !== undefined) return cached;
+
+  let mostBoxes = 0;
+  for (const edge of ALL_DOT_EDGES) {
+    if (edges[edge]) continue;
+    const nextEdges: DotEdges = { ...edges, [edge]: 'X' };
+    const completed = getCompletedBoxes(nextEdges, boxes, edge);
+    if (!completed.length) continue;
+
+    const nextBoxes = [...boxes];
+    completed.forEach((boxIndex) => {
+      nextBoxes[boxIndex] = 'X';
+    });
+    mostBoxes = Math.max(mostBoxes, completed.length + maxCaptureRun(nextEdges, nextBoxes, memo));
+  }
+
+  memo.set(key, mostBoxes);
+  return mostBoxes;
 }
 
 function countBoxSides(edges: DotEdges, boxIndex: number): number {

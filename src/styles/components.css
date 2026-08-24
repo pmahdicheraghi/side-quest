@@ -282,14 +282,13 @@ html[dir='rtl'] .match-result-timer {
   text-transform: uppercase;
 }
 
-.setup-fieldset .mode-toggle {
-  margin: 0;
-}
 .setup-options {
   display: grid;
   gap: 8px;
 }
-.difficulty-options,
+.play-options {
+  grid-template-columns: repeat(3, 1fr);
+}
 .round-options {
   grid-template-columns: repeat(3, 1fr);
 }
@@ -314,11 +313,40 @@ html[dir='rtl'] .match-result-timer {
   font-size: 9px;
   line-height: 1.35;
 }
+.play-option {
+  min-height: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 10px 6px;
+  text-align: center;
+}
+.play-option .icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+}
+.play-option span {
+  min-width: 0;
+}
+.play-option-two {
+  min-height: 64px;
+  grid-column: 1 / -1;
+  flex-direction: row;
+  padding-inline: 14px;
+  text-align: start;
+}
 .setup-option.is-selected {
   border-color: var(--acid);
   background: var(--acid-tint);
   color: var(--acid);
   box-shadow: inset 0 0 0 1px var(--acid-border-subtle);
+}
+.play-option.is-selected .icon {
+  color: var(--acid);
 }
 .setup-note {
   display: block;
