@@ -25,7 +25,7 @@ export function SettingsPage({
   onBack: () => void;
 }) {
   const { t } = useI18n();
-  useEffect(() => animateIn('.settings-intro > *, .settings-row, .settings-note, .settings-back'), []);
+  useEffect(() => animateIn('.settings-intro > *, .settings-row, .settings-note, .settings-version, .settings-back'), []);
 
   return (
     <main className="shell settings-screen">
@@ -76,6 +76,9 @@ export function SettingsPage({
         ))}
       </section>
       <p className="settings-note">{t('settingsNote')}</p>
+      <p className="settings-version">
+        {t('version', { version: __APP_RELEASE__ })} · {t('build', { build: __APP_COMMIT__ })}
+      </p>
       <button type="button" className="text-btn settings-back" onClick={onBack}>
         {t('backToMenuAction')} <Icon name="arrow" />
       </button>

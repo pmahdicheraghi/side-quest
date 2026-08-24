@@ -18,7 +18,7 @@ npm run build
 npm run preview
 ```
 
-The service worker is registered only in production builds, so offline and update behavior should be tested through `npm run preview` rather than the development server. Each production build gets a unique version marker. Installed copies check it on launch, reconnect, tab focus, and every five minutes; downloaded releases activate automatically and are used on the next navigation or launch.
+The service worker is registered only in production builds, so offline and update behavior should be tested through `npm run preview` rather than the development server. Each production build uses the package release and short Git commit as its identity, for example `1.3.0+b2a0c51`. Installed copies check for releases on launch, reconnect, tab focus, and every five minutes. A release downloads in the background, then waits for the user to apply it from the menu so an active match is never interrupted.
 
 ## Code quality
 
@@ -29,6 +29,37 @@ npm run format
 ```
 
 ESLint is configured with the TypeScript ESLint ruleset, while Prettier handles TypeScript, CSS, HTML, JSON, JavaScript, and Markdown formatting.
+
+## Releases and deployment
+
+Side Quest uses semantic versions. Use a patch for fixes, a minor version for new games or features, and a major version for incompatible stored-data or experience changes. `package.json` is the release source of truth; the release workflow rejects a Git tag that does not match it.
+
+After this deployment setup is merged, publish the first controlled release:
+
+```bash
+git tag v1.3.0
+git push origin v1.3.0
+```
+
+For later releases, `npm version patch`, `npm version minor`, or `npm version major` updates the package and lockfile, creates the version commit, and creates the matching Git tag. Push both with `git push --follow-tags`.
+
+Pull requests and pushes to `master` run formatting, linting, and a production build. A `v*` tag builds one artifact and deploys it through the protected `production` GitHub environment. Configure that environment with a required reviewer if production should wait for approval.
+
+The object storage provider must expose an S3-compatible API. Create a `production` GitHub environment with these environment variables:
+
+- `APP_URL` — the public HTTPS URL where Side Quest is served, without a trailing slash
+- `OBJECT_STORAGE_ENDPOINT` — the provider's HTTPS S3 API endpoint, not the public website URL
+- `OBJECT_STORAGE_BUCKET` — the provider's bucket or container name
+- `OBJECT_STORAGE_REGION` — the provider region; omit it to use `us-east-1`
+
+Add these values as GitHub environment **secrets**, never variables or repository files:
+
+- `OBJECT_STORAGE_ACCESS_TOKEN`
+- `OBJECT_STORAGE_SECRET_TOKEN`
+
+The workflow maps those secrets to the standard S3 client credential variables at runtime. The script retains old hashed bundles intentionally, publishes `version.json` last, and verifies both the uploaded object and public website. If the provider has a CDN or caching proxy, configure `index.html`, `sw.js`, and `version.json` with a zero or revalidation-only TTL. The deployment intentionally fails when the public URL remains stale so a release cannot appear successful while users still receive old control files.
+
+Enable object versioning if the provider supports it and use a lifecycle rule to remove unused hashed assets after a suitable rollback window, such as 90 days. If the provider is not S3 compatible, replace `scripts/deploy-static-site.sh` with its supported CLI or upload API.
 
 The menu currently includes:
 
@@ -50,24 +81,28 @@ The interface supports English and Persian. Choose the language in Settings; the
 
 ```text
 src/
-  app/                 React shell, typed view routing, icons, motion helpers
-  app/settings.ts      persisted user preferences and haptic helper
-  components/          shared React game layout components
-  pages/tic-tac-toe/   Tic Tac Toe state, bot, and UI
-  pages/memory-match/  Memory Match state, bot, and UI
-  pages/reaction-duel/ Reaction Duel state, bot, and UI
-  pages/connect-four/  Connect Four rules, minimax bot, and UI
-  pages/dots-boxes/    Dots & Boxes rules, bot tactics, and board UI
-  pages/settings/      preferences screen and toggle controls
+  app/                  React shell, typed view routing, icons, motion helpers
+  app/settings.ts       persisted user preferences and haptic helper
+  components/           shared React game layout components
+  pages/
+    tic-tac-toe/        Tic Tac Toe state, bot, and UI
+    memory-match/       Memory Match state, bot, and UI
+    reaction-duel/      Reaction Duel state, bot, and UI
+    connect-four/       Connect Four rules, minimax bot, and UI
+    dots-boxes/         Dots & Boxes rules, bot tactics, and board UI
+    settings/           preferences screen and toggle controls
   styles/
-    global.css         tokens, typography, menu, shared layout, and accessibility
-    components.css     small shared component rules
-  main.tsx             React/Vite entry point
+    global.css          tokens, typography, menu, shared layout, and accessibility
+    components.css      small shared component rules
+  main.tsx              React/Vite entry point
 public/
   audio/                soundtrack asset
+  fonts/                fonts asset
   icon.svg              application icon
   manifest.webmanifest  install metadata
   sw.js                 production offline cache
+.github/workflows/      pull-request CI and tag-based releases
+scripts/                deployment scripts used by CI
 ```
 
 Each game is a self-contained React component with local state and effects for timers, bot turns, haptics, and motion. The app switches screens through typed React view state in `src/app/react-app.tsx`.

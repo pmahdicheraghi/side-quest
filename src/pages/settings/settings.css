@@ -149,6 +149,13 @@ html[dir='rtl'] .language-select .icon {
 .settings-note {
   margin: 24px 3px 0;
 }
+.settings-version {
+  margin: 10px 3px 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
 .settings-back {
   display: inline-flex;
   align-items: center;

@@ -34,8 +34,9 @@ export function ReactApp(): ReactElement {
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(isStandaloneDisplayMode);
+  const [dismissedUpdate, setDismissedUpdate] = useState<string | null>(null);
   const musicRef = useRef<MusicController | null>(null);
-  usePwaUpdate();
+  const pwaUpdate = usePwaUpdate();
 
   if (!musicRef.current) musicRef.current = new MusicController(settings.music);
 
@@ -125,7 +126,18 @@ export function ReactApp(): ReactElement {
       onClick={() => musicRef.current?.handleGesture()}
       onPointerDown={() => musicRef.current?.handleGesture()}
     >
-      {view === 'menu' && <MenuPage onNavigate={navigate} canInstall={Boolean(installPrompt && !isInstalled)} onInstall={installApp} />}
+      {view === 'menu' && (
+        <MenuPage
+          onNavigate={navigate}
+          canInstall={Boolean(installPrompt && !isInstalled)}
+          onInstall={installApp}
+          updateVersion={pwaUpdate.availableVersion}
+          isUpdating={pwaUpdate.status === 'applying'}
+          showUpdate={(pwaUpdate.status === 'ready' || pwaUpdate.status === 'applying') && dismissedUpdate !== pwaUpdate.availableVersion}
+          onUpdate={pwaUpdate.applyUpdate}
+          onDismissUpdate={() => setDismissedUpdate(pwaUpdate.availableVersion)}
+        />
+      )}
       {view === 'settings' && <SettingsPage settings={settings} onChange={updateSetting} onBack={returnToMenu} />}
       {view === 'tic' && <TicTacToePage setup={gameSetup} onExit={returnToMenu} />}
       {view === 'memory' && <MemoryMatchPage setup={gameSetup} onExit={returnToMenu} />}
@@ -172,7 +184,25 @@ function gameTitle(view: Exclude<View, 'menu' | 'settings'>, language: Language)
   return translate(language, 'dotsBoxes');
 }
 
-function MenuPage({ onNavigate, canInstall, onInstall }: { onNavigate: (view: View) => void; canInstall: boolean; onInstall: () => void }) {
+function MenuPage({
+  onNavigate,
+  canInstall,
+  onInstall,
+  updateVersion,
+  isUpdating,
+  showUpdate,
+  onUpdate,
+  onDismissUpdate,
+}: {
+  onNavigate: (view: View) => void;
+  canInstall: boolean;
+  onInstall: () => void;
+  updateVersion: string | null;
+  isUpdating: boolean;
+  showUpdate: boolean;
+  onUpdate: () => void;
+  onDismissUpdate: () => void;
+}) {
   const { language, t } = useI18n();
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
 
@@ -216,6 +246,23 @@ function MenuPage({ onNavigate, canInstall, onInstall }: { onNavigate: (view: Vi
           </button>
         </div>
       </header>
+
+      {showUpdate && updateVersion && (
+        <section className="update-banner" role="status" aria-live="polite">
+          <div className="update-copy">
+            <strong>{t('updateReady', { version: updateVersion })}</strong>
+            <span>{t('updateDescription')}</span>
+          </div>
+          <div className="update-actions">
+            <button type="button" className="update-primary" onClick={onUpdate} disabled={isUpdating}>
+              {t(isUpdating ? 'updating' : 'updateNow')}
+            </button>
+            <button type="button" className="update-later" onClick={onDismissUpdate} disabled={isUpdating}>
+              {t('updateLater')}
+            </button>
+          </div>
+        </section>
+      )}
 
       <section className="welcome">
         <div className="eyebrow">
@@ -364,7 +411,7 @@ function MenuPage({ onNavigate, canInstall, onInstall }: { onNavigate: (view: Vi
           <Icon name="spark" /> {t('footerTagline')}
         </span>
         <span>
-          {t('version')} / {t('byMahdi')}
+          {t('version', { version: __APP_RELEASE__ })} / {t('byMahdi')}
         </span>
       </footer>
     </main>
