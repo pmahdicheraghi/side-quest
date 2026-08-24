@@ -8,28 +8,31 @@ import './tic-tac-toe.css';
 import { useI18n } from '../../app/i18n';
 import {
   chooseTicBotMove,
-  createTicBoard,
+  createTicState,
+  getExpiringTicCell,
   getTicResult,
   getTicWinningLine,
   playTicMove,
-  type TicCell,
   type TicResult,
+  type TicState,
 } from './tic-tac-toe-logic';
 
 export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () => void }) {
   const { language, t } = useI18n();
   const mode = setup.mode;
-  const [board, setBoard] = useState<TicCell[]>(createTicBoard);
+  const [game, setGame] = useState<TicState>(createTicState);
   const [turn, setTurn] = useState<Player>('X');
   const [winner, setWinner] = useState<TicResult>(null);
   const [winningLine, setWinningLine] = useState<number[]>([]);
   const [scores, setScores] = useState<Record<Player, number>>({ X: 0, O: 0 });
   const [round, setRound] = useState(1);
 
-  const finishRound = (result: Exclude<TicResult, null>, finalBoard: TicCell[], human: boolean) => {
+  const board = game.board;
+
+  const finishRound = (result: Exclude<TicResult, null>, finalGame: TicState, human: boolean) => {
     setWinner(result);
-    setWinningLine(getTicWinningLine(finalBoard) ?? []);
-    if (result !== 'draw') setScores((current) => ({ ...current, [result]: current[result] + 1 }));
+    setWinningLine(getTicWinningLine(finalGame.board) ?? []);
+    setScores((current) => ({ ...current, [result]: current[result] + 1 }));
     if (human) triggerHaptic([18, 35, 18]);
   };
 
@@ -42,10 +45,10 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
   useEffect(() => {
     if (winner || mode !== 'bot' || turn !== 'O') return;
     const timeout = window.setTimeout(() => {
-      const choice = chooseTicBotMove(board, setup.difficulty);
-      const next = playTicMove(board, choice, 'O');
+      const choice = chooseTicBotMove(game, setup.difficulty);
+      const next = playTicMove(game, choice, 'O');
       if (!next) return;
-      setBoard(next);
+      setGame(next);
       const result = getTicResult(next);
       if (result) {
         finishRound(result, next, false);
@@ -53,12 +56,12 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
       if (motionEnabled()) anime({ targets: `.tic-cell[data-cell="${choice}"]`, scale: [0.88, 1], duration: 240, easing: 'easeOutBack' });
     }, 420);
     return () => window.clearTimeout(timeout);
-  }, [board, mode, turn, winner]);
+  }, [game, mode, setup.difficulty, turn, winner]);
 
   const resetRound = (advanceRound = false) => {
     const nextRound = advanceRound ? round + 1 : round;
     if (advanceRound) setRound(nextRound);
-    setBoard(createTicBoard());
+    setGame(createTicState());
     setTurn(getRoundStarter(nextRound));
     setWinner(null);
     setWinningLine([]);
@@ -72,9 +75,9 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
 
   const play = (index: number) => {
     if (winner || board[index] || (mode === 'bot' && turn === 'O')) return;
-    const next = playTicMove(board, index, turn);
+    const next = playTicMove(game, index, turn);
     if (!next) return;
-    setBoard(next);
+    setGame(next);
     triggerHaptic();
     const result = getTicResult(next);
     if (result) {
@@ -84,15 +87,14 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
   };
 
   const matchComplete = Boolean(winner) && round >= setup.rounds;
+  const expiringCells = [getExpiringTicCell(game, 'X'), getExpiringTicCell(game, 'O')];
   const playerName = (player: Player) => t(player === 'X' ? 'player1' : mode === 'bot' ? 'bot' : 'player2');
   const status = winner
     ? matchComplete
       ? scores.X === scores.O
         ? t('matchDraw')
         : t('winsMatch', { player: playerName(scores.X > scores.O ? 'X' : 'O') })
-      : winner === 'draw'
-        ? t('drawRound')
-        : t('takesRound', { player: playerName(winner) })
+      : t('takesRound', { player: playerName(winner) })
     : t('playerTurn', { player: playerName(turn) });
 
   return (
@@ -114,14 +116,14 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
           {board.map((mark, index) => (
             <button
               type="button"
-              className={`tic-cell ${mark.toLowerCase()} ${winningLine.includes(index) ? 'is-winner' : ''}`}
+              className={`tic-cell ${mark.toLowerCase()} ${winningLine.includes(index) ? 'is-winner' : ''} ${expiringCells.includes(index) ? 'is-expiring' : ''}`}
               data-cell={index}
               key={index}
               onClick={() => play(index)}
               disabled={Boolean(mark) || Boolean(winner) || (mode === 'bot' && turn === 'O')}
               aria-label={
                 mark
-                  ? t(winningLine.includes(index) ? 'cellWinning' : 'cellMarked', {
+                  ? t(winningLine.includes(index) ? 'cellWinning' : expiringCells.includes(index) ? 'cellExpiring' : 'cellMarked', {
                       cell: new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(index + 1),
                       player: playerName(mark),
                     })

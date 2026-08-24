@@ -63,7 +63,7 @@ Enable object versioning if the provider supports it and use a lifecycle rule to
 
 The menu currently includes:
 
-- **Tic Tac Toe** — play against a defensive bot or pass the phone for two-player rounds.
+- **Continuous Tic Tac Toe** — keep three marks each; every fourth move relocates the oldest mark.
 - **Memory Match** — find eight pairs against a bot or in pass-and-play mode.
 - **Reaction Duel** — wait for the green signal; the first valid tap wins and an early tap forfeits the round.
 - **Connect Four** — drop discs into seven columns, build a line of four, and block the opponent.
