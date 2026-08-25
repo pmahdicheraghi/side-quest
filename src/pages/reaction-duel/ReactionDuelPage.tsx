@@ -135,7 +135,13 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
         statSuffix={<small>/ {new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(setup.rounds)}</small>}
         onExit={onExit}
       />
-      <ScoreStrip leftLabel={t('player1')} leftMark="✦" rightLabel={t(mode === 'bot' ? 'bot' : 'player2')} rightMark="✦" scores={scores} />
+      <ScoreStrip
+        leftLabel={t('player1')}
+        leftMark="✦"
+        rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
+        rightMark="✦"
+        scores={scores}
+      />
       <section className={`reaction-arena phase-${phase}`}>
         <div className={`signal-orb ${phase === 'go' ? 'signal-go' : ''}`} aria-hidden="true">
           <span>{phase === 'go' ? t('go') : '✦'}</span>

@@ -157,7 +157,7 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
       <ScoreStrip
         leftLabel={t('player1')}
         leftMark="●"
-        rightLabel={t(mode === 'bot' ? 'bot' : 'player2')}
+        rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
         rightMark="●"
         scores={scores}
         turn={turn}

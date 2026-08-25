@@ -305,7 +305,10 @@ p {
   font-family: var(--font-mono);
   font-size: 18px;
   line-height: 1;
-  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 .score-mark.x-label.is-active,
 .score-mark.o-label.is-active {
@@ -313,11 +316,15 @@ p {
 }
 .score-mark.x-label.is-active {
   border-color: var(--acid);
-  box-shadow: 0 0 0 2px var(--acid), 0 0 12px var(--acid-glow);
+  box-shadow:
+    0 0 0 2px var(--acid),
+    0 0 12px var(--acid-glow);
 }
 .score-mark.o-label.is-active {
   border-color: var(--orange);
-  box-shadow: 0 0 0 2px var(--orange), 0 0 12px var(--orange-glow);
+  box-shadow:
+    0 0 0 2px var(--orange),
+    0 0 12px var(--orange-glow);
 }
 .score-copy {
   display: flex;
