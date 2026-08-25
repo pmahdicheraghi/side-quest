@@ -3,7 +3,7 @@ import anime from 'animejs';
 import { animateIn, motionEnabled } from '../../app/animation';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameActions, GameHeader, MatchResultOverlay, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import './tic-tac-toe.css';
 import { useI18n } from '../../app/i18n';
 import {
@@ -107,7 +107,14 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
         statSuffix={<small>/ {new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(setup.rounds)}</small>}
         onExit={onExit}
       />
-      <ScoreStrip leftLabel={t('player1')} leftMark="×" rightLabel={t(mode === 'bot' ? 'bot' : 'player2')} rightMark="○" scores={scores} />
+      <ScoreStrip
+        leftLabel={t('player1')}
+        leftMark="×"
+        rightLabel={t(mode === 'bot' ? 'bot' : 'player2')}
+        rightMark="○"
+        scores={scores}
+        turn={turn}
+      />
       <section className="tic-board-wrap">
         <div className="turn-label" role="status" aria-live="polite">
           {status}
@@ -142,7 +149,7 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
         resetDisabled={Boolean(winner)}
       />
       <Tip>{t('ticTip')}</Tip>
-      {matchComplete && <MatchResultOverlay message={status} onComplete={onExit} />}
+      {matchComplete && <MatchResultToast message={status} />}
     </main>
   );
 }

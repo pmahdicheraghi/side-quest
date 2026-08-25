@@ -51,17 +51,6 @@
   opacity: 0.58;
   box-shadow: inset 0 0 0 1px currentColor;
 }
-.tic-cell.is-expiring:not(.is-winner)::after {
-  content: '';
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  box-shadow: 0 0 8px currentColor;
-}
 .tic-cell.x.is-winner {
   color: var(--memory-front-ink);
   background: var(--acid);

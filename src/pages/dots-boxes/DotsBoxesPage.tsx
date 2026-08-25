@@ -4,7 +4,7 @@ import { animateIn, motionEnabled } from '../../app/animation';
 import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameActions, GameHeader, MatchResultOverlay, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import {
   chooseDotsBotEdge,
   countOwnedBoxes,
@@ -169,6 +169,7 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
         rightLabel={t(mode === 'bot' ? 'bot' : 'player2')}
         rightMark="■"
         scores={matchScores}
+        turn={turn}
       />
       <section className="dots-board-wrap">
         <div className="dots-status" role="status" aria-live="polite">
@@ -201,7 +202,7 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
         resetDisabled={Boolean(roundWinner) || isSettling}
       />
       <Tip>{t('dotsTip')}</Tip>
-      {matchComplete && <MatchResultOverlay message={status} onComplete={onExit} />}
+      {matchComplete && <MatchResultToast message={status} />}
     </main>
   );
 }

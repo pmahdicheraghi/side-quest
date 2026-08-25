@@ -4,7 +4,7 @@ import { animateIn, motionEnabled } from '../../app/animation';
 import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameActions, GameHeader, MatchResultOverlay, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import {
   chooseConnectBotColumn,
   CONNECT_COLUMNS,
@@ -154,7 +154,14 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
         statSuffix={<small>/ {numberFormatter.format(setup.rounds)}</small>}
         onExit={onExit}
       />
-      <ScoreStrip leftLabel={t('player1')} leftMark="●" rightLabel={t(mode === 'bot' ? 'bot' : 'player2')} rightMark="●" scores={scores} />
+      <ScoreStrip
+        leftLabel={t('player1')}
+        leftMark="●"
+        rightLabel={t(mode === 'bot' ? 'bot' : 'player2')}
+        rightMark="●"
+        scores={scores}
+        turn={turn}
+      />
       <section className="connect-board-wrap">
         <div className="turn-label" role="status" aria-live="polite">
           {status}
@@ -199,7 +206,7 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
         resetDisabled={Boolean(winner) || isSettling}
       />
       <Tip>{t('connectTip')}</Tip>
-      {matchComplete && <MatchResultOverlay message={status} onComplete={onExit} />}
+      {matchComplete && <MatchResultToast message={status} />}
     </main>
   );
 }

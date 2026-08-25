@@ -1,6 +1,7 @@
-import { useEffect, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { iconPaths } from '../app/icons';
 import { useI18n } from '../app/i18n';
+import { Player } from '../app/types';
 
 export function Icon({ name, className = 'icon' }: { name: string; className?: string }) {
   return (
@@ -56,19 +57,21 @@ export function ScoreStrip({
   rightLabel,
   rightMark,
   scores,
+  turn,
 }: {
   leftLabel: string;
   leftMark: string;
   rightLabel: string;
   rightMark: string;
   scores: Record<'X' | 'O', number>;
+  turn?: Player;
 }) {
   const { language, t } = useI18n();
   const formatScore = (score: number) => new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(score);
   return (
     <section className="score-strip">
       <div className={`score-player score-player-x ${scores.X > scores.O ? 'is-leading' : ''}`}>
-        <b className="score-mark x-label" aria-hidden="true">
+        <b className={`score-mark x-label ${turn === 'X' ? 'is-active' : ''}`} aria-hidden="true">
           {leftMark}
         </b>
         <span className="score-copy">
@@ -80,7 +83,7 @@ export function ScoreStrip({
         <span>{t('versus')}</span>
       </div>
       <div className={`score-player score-player-o ${scores.O > scores.X ? 'is-leading' : ''}`}>
-        <b className="score-mark o-label" aria-hidden="true">
+        <b className={`score-mark o-label ${turn === 'O' ? 'is-active' : ''}`} aria-hidden="true">
           {rightMark}
         </b>
         <span className="score-copy">
@@ -117,67 +120,27 @@ export function GameActions({
 }
 
 const MATCH_RESULT_DURATION = 3200;
-const CELEBRATION_COLORS = ['#d6f36a', '#ff9a62', '#65d8ff', '#ff70ad', '#b98cff', '#ffe066'];
-const CELEBRATION_PIECES = Array.from({ length: 72 }, (_, index) => {
-  const launchesFromLeft = index % 2 === 0;
-  const spin = (index % 2 ? 1 : -1) * (560 + ((index * 71) % 760));
-  const horizontalBurst = 24 + ((index * 37) % 168);
-  const exitX = launchesFromLeft ? horizontalBurst + 34 : -horizontalBurst - 34;
-  return {
-    left: `${launchesFromLeft ? 10 + ((index * 17) % 15) : 75 + ((index * 17) % 15)}%`,
-    color: CELEBRATION_COLORS[index % CELEBRATION_COLORS.length],
-    delay: `${60 + ((index * 53) % 520)}ms`,
-    duration: `${1850 + ((index * 97) % 620)}ms`,
-    width: `${6 + ((index * 3) % 7)}px`,
-    height: `${12 + ((index * 5) % 14)}px`,
-    exitX: `${exitX + ((index * 19) % 42) - 21}px`,
-    exitY: `${-(390 + ((index * 23) % 95))}px`,
-    spin: `${spin}deg`,
-    shape: index % 9 === 0 ? 'is-streamer' : index % 5 === 0 ? 'is-circle' : index % 6 === 0 ? 'is-diamond' : '',
-  };
-});
 
-export function MatchResultOverlay({ message, onComplete }: { message: string; onComplete: () => void }) {
+export function MatchResultToast({ message }: { message: string }) {
   const { t } = useI18n();
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const timeout = window.setTimeout(onComplete, MATCH_RESULT_DURATION);
+    const timeout = window.setTimeout(() => setVisible(false), MATCH_RESULT_DURATION);
     return () => window.clearTimeout(timeout);
-  }, [onComplete]);
+  }, []);
+
+  if (!visible) return null;
 
   return (
-    <div className="match-result-overlay" role="status" aria-live="assertive" aria-atomic="true">
-      <div className="match-result-card">
-        <div className="celebration-confetti" aria-hidden="true">
-          {CELEBRATION_PIECES.map((piece, index) => (
-            <span
-              className={`confetti-piece ${piece.shape}`}
-              key={index}
-              style={
-                {
-                  left: piece.left,
-                  color: piece.color,
-                  backgroundColor: piece.color,
-                  animationDelay: piece.delay,
-                  animationDuration: piece.duration,
-                  '--confetti-width': piece.width,
-                  '--confetti-height': piece.height,
-                  '--confetti-exit-x': piece.exitX,
-                  '--confetti-exit-y': piece.exitY,
-                  '--confetti-spin': piece.spin,
-                } as CSSProperties
-              }
-            />
-          ))}
-        </div>
-        <span className="match-result-spark" aria-hidden="true">
-          ✦
-        </span>
-        <p>{t('matchComplete')}</p>
-        <h2>{message}</h2>
-        <small>{t('returningToMenu')}</small>
-        <span className="match-result-timer" aria-hidden="true" />
-      </div>
+    <div className="match-result-toast" role="status" aria-live="assertive" aria-atomic="true">
+      <span className="match-result-toast-spark" aria-hidden="true">
+        ✦
+      </span>
+      <span>
+        <small>{t('matchComplete')}</small>
+        <strong>{message}</strong>
+      </span>
     </div>
   );
 }

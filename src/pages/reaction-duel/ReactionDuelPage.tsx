@@ -3,7 +3,7 @@ import anime from 'animejs';
 import { animateIn, motionEnabled } from '../../app/animation';
 import { triggerHaptic } from '../../app/settings';
 import type { GameSetup, Player } from '../../app/types';
-import { GameActions, GameHeader, MatchResultOverlay, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import './reaction-duel.css';
 import { useI18n } from '../../app/i18n';
 import {
@@ -199,7 +199,7 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
         resetDisabled={running || phase === 'result'}
       />
       <Tip>{t('reactionTip')}</Tip>
-      {matchComplete && <MatchResultOverlay message={status} onComplete={onExit} />}
+      {matchComplete && <MatchResultToast message={status} />}
     </main>
   );
 }
