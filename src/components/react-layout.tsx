@@ -72,9 +72,7 @@ export function ScoreStrip({
 }) {
   const { language, t } = useI18n();
   const formatVal = (val: number | string) =>
-    typeof val === 'number'
-      ? new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(val)
-      : val;
+    typeof val === 'number' ? new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(val) : val;
 
   return (
     <section className="score-strip">

@@ -107,11 +107,7 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
 
           if (nextPairs === MEMORY_SYMBOLS.length) {
             const roundWinner: Player | 'draw' =
-              nextRoundScores.X === nextRoundScores.O
-                ? 'draw'
-                : nextRoundScores.X > nextRoundScores.O
-                  ? 'X'
-                  : 'O';
+              nextRoundScores.X === nextRoundScores.O ? 'draw' : nextRoundScores.X > nextRoundScores.O ? 'X' : 'O';
             if (roundWinner !== 'draw') {
               setMatchScores((current) => ({ ...current, [roundWinner]: current[roundWinner] + 1 }));
             }

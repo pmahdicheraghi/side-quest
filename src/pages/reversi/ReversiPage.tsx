@@ -5,14 +5,7 @@ import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
 import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
-import {
-  chooseReversiBotMove,
-  countDiscs,
-  createReversiBoard,
-  getValidMoves,
-  makeMove,
-  type ReversiCell,
-} from './reversi-logic';
+import { chooseReversiBotMove, countDiscs, createReversiBoard, getValidMoves, makeMove, type ReversiCell } from './reversi-logic';
 import './reversi.css';
 
 const FLIP_SETTLE_MS = 380;
@@ -128,10 +121,13 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
       setPassMessage(null);
       setIsSettling(true);
       clearTimers();
-      settleTimeoutRef.current = window.setTimeout(() => {
-        settleTimeoutRef.current = null;
-        finishRound(nextBoard);
-      }, motionEnabled() ? FLIP_SETTLE_MS : 0);
+      settleTimeoutRef.current = window.setTimeout(
+        () => {
+          settleTimeoutRef.current = null;
+          finishRound(nextBoard);
+        },
+        motionEnabled() ? FLIP_SETTLE_MS : 0,
+      );
     }
   };
 
@@ -175,10 +171,13 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
           // Game over
           setIsSettling(true);
           clearTimers();
-          settleTimeoutRef.current = window.setTimeout(() => {
-            settleTimeoutRef.current = null;
-            finishRound(board);
-          }, motionEnabled() ? FLIP_SETTLE_MS : 0);
+          settleTimeoutRef.current = window.setTimeout(
+            () => {
+              settleTimeoutRef.current = null;
+              finishRound(board);
+            },
+            motionEnabled() ? FLIP_SETTLE_MS : 0,
+          );
         }
       }
     }, 480);
@@ -211,7 +210,7 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
         : roundWinner === 'draw'
           ? t('drawRound')
           : t('takesRound', { player: playerName(roundWinner) })
-      : passMessage ?? t('playerTurn', { player: playerName(turn) });
+      : (passMessage ?? t('playerTurn', { player: playerName(turn) }));
 
   return (
     <main className="shell game-screen reversi-screen">

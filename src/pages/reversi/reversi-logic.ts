@@ -133,14 +133,8 @@ export function getReversiResult(board: readonly ReversiCell[]): Player | 'draw'
 }
 
 const POSITION_WEIGHTS: readonly number[] = [
-  120, -25,  20,   5,   5,  20, -25, 120,
-  -25, -45,  -5,  -5,  -5,  -5, -45, -25,
-   20,  -5,  15,   3,   3,  15,  -5,  20,
-    5,  -5,   3,   1,   1,   3,  -5,   5,
-    5,  -5,   3,   1,   1,   3,  -5,   5,
-   20,  -5,  15,   3,   3,  15,  -5,  20,
-  -25, -45,  -5,  -5,  -5,  -5, -45, -25,
-  120, -25,  20,   5,   5,  20, -25, 120,
+  120, -25, 20, 5, 5, 20, -25, 120, -25, -45, -5, -5, -5, -5, -45, -25, 20, -5, 15, 3, 3, 15, -5, 20, 5, -5, 3, 1, 1, 3, -5, 5, 5, -5, 3, 1,
+  1, 3, -5, 5, 20, -5, 15, 3, 3, 15, -5, 20, -25, -45, -5, -5, -5, -5, -45, -25, 120, -25, 20, 5, 5, 20, -25, 120,
 ];
 
 const CORNERS: readonly number[] = [0, 7, 56, 63];
@@ -183,13 +177,7 @@ function evaluateBoard(board: readonly ReversiCell[]): number {
   return score;
 }
 
-function minimax(
-  board: readonly ReversiCell[],
-  depth: number,
-  alpha: number,
-  beta: number,
-  isMaximizing: boolean,
-): number {
+function minimax(board: readonly ReversiCell[], depth: number, alpha: number, beta: number, isMaximizing: boolean): number {
   const currentTurn: Player = isMaximizing ? 'O' : 'X';
   const validMoves = getValidMoves(board, currentTurn);
 
