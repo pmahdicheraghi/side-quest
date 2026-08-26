@@ -169,24 +169,22 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
         rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
         rightMark="■"
         scores={matchScores}
+        inGameScores={{
+          X: countOwnedBoxes(boxes, 'X'),
+          O: countOwnedBoxes(boxes, 'O'),
+        }}
+        inGameUnit={t('boxesUnit')}
         turn={turn}
       />
       <section className="dots-board-wrap">
         <div className="dots-status" role="status" aria-live="polite">
           {status}
         </div>
-        <div className="dots-box-score" aria-label={t('dotsBoxScore')}>
-          <span>
-            {playerName('X')}: {numberFormatter.format(countOwnedBoxes(boxes, 'X'))}
-          </span>
-          <span>
-            {playerName('O')}: {numberFormatter.format(countOwnedBoxes(boxes, 'O'))}
-          </span>
-        </div>
         <div className="dots-board" role="group" aria-label={t('dotsBoard')}>
           {renderBoard({
             edges,
             boxes,
+            lastEdge,
             disabled: Boolean(roundWinner) || isSettling || (mode === 'bot' && turn === 'O'),
             playerName,
             numberFormatter,
@@ -210,6 +208,7 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
 type BoardRenderProps = {
   edges: DotEdges;
   boxes: DotBoxes;
+  lastEdge: DotEdge | null;
   disabled: boolean;
   playerName: (player: Player) => string;
   numberFormatter: Intl.NumberFormat;
@@ -217,7 +216,7 @@ type BoardRenderProps = {
   t: ReturnType<typeof useI18n>['t'];
 };
 
-function renderBoard({ edges, boxes, disabled, playerName, numberFormatter, onPlay, t }: BoardRenderProps): ReactNode[] {
+function renderBoard({ edges, boxes, lastEdge, disabled, playerName, numberFormatter, onPlay, t }: BoardRenderProps): ReactNode[] {
   return Array.from({ length: DOT_BOX_SIZE * 2 + 1 }, (_, gridRow) =>
     Array.from({ length: DOT_BOX_SIZE * 2 + 1 }, (_, gridColumn) => {
       const key = `${gridRow}-${gridColumn}`;
@@ -247,7 +246,7 @@ function renderBoard({ edges, boxes, disabled, playerName, numberFormatter, onPl
       return (
         <button
           type="button"
-          className={`dots-edge ${horizontal ? 'horizontal' : 'vertical'} ${owner ? `owner-${owner.toLowerCase()}` : ''}`}
+          className={`dots-edge ${horizontal ? 'horizontal' : 'vertical'} ${owner ? `owner-${owner.toLowerCase()}` : ''} ${edge === lastEdge ? 'is-last-edge' : ''}`}
           data-edge={edge}
           key={key}
           onClick={() => onPlay(edge)}

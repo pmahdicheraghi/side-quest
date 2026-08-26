@@ -51,6 +51,24 @@
   opacity: 0.58;
   box-shadow: inset 0 0 0 1px currentColor;
 }
+.tic-cell.is-last-move:not(.is-winner) {
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+.tic-cell.is-last-move:not(.is-winner)::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+}
+html[dir='rtl'] .tic-cell.is-last-move:not(.is-winner)::after {
+  right: auto;
+  left: 8px;
+}
 .tic-cell.x.is-winner {
   color: var(--memory-front-ink);
   background: var(--acid);

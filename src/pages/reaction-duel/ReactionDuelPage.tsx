@@ -141,6 +141,10 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
         rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
         rightMark="✦"
         scores={scores}
+        inGameScores={{
+          X: reactions.X ? `${new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(reactions.X)}ms` : '—',
+          O: reactions.O ? `${new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(reactions.O)}ms` : '—',
+        }}
       />
       <section className={`reaction-arena phase-${phase}`}>
         <div className={`signal-orb ${phase === 'go' ? 'signal-go' : ''}`} aria-hidden="true">

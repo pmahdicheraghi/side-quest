@@ -26,6 +26,7 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
   const [winningLine, setWinningLine] = useState<number[]>([]);
   const [scores, setScores] = useState<Record<Player, number>>({ X: 0, O: 0 });
   const [round, setRound] = useState(1);
+  const [lastMove, setLastMove] = useState<number | null>(null);
 
   const board = game.board;
 
@@ -49,6 +50,7 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
       const next = playTicMove(game, choice, 'O');
       if (!next) return;
       setGame(next);
+      setLastMove(choice);
       const result = getTicResult(next);
       if (result) {
         finishRound(result, next, false);
@@ -65,6 +67,7 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
     setTurn(getRoundStarter(nextRound));
     setWinner(null);
     setWinningLine([]);
+    setLastMove(null);
   };
 
   useEffect(() => {
@@ -78,6 +81,7 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
     const next = playTicMove(game, index, turn);
     if (!next) return;
     setGame(next);
+    setLastMove(index);
     triggerHaptic();
     const result = getTicResult(next);
     if (result) {
@@ -113,6 +117,11 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
         rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
         rightMark="○"
         scores={scores}
+        inGameScores={{
+          X: board.filter((c) => c === 'X').length,
+          O: board.filter((c) => c === 'O').length,
+        }}
+        inGameUnit={t('marksUnit')}
         turn={turn}
       />
       <section className="tic-board-wrap">
@@ -123,7 +132,7 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
           {board.map((mark, index) => (
             <button
               type="button"
-              className={`tic-cell ${mark.toLowerCase()} ${winningLine.includes(index) ? 'is-winner' : ''} ${expiringCells.includes(index) ? 'is-expiring' : ''}`}
+              className={`tic-cell ${mark.toLowerCase()} ${winningLine.includes(index) ? 'is-winner' : ''} ${lastMove === index ? 'is-last-move' : ''} ${expiringCells.includes(index) ? 'is-expiring' : ''}`}
               data-cell={index}
               key={index}
               onClick={() => play(index)}

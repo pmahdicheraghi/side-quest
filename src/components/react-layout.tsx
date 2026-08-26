@@ -57,6 +57,8 @@ export function ScoreStrip({
   rightLabel,
   rightMark,
   scores,
+  inGameScores,
+  inGameUnit,
   turn,
 }: {
   leftLabel: string;
@@ -64,10 +66,16 @@ export function ScoreStrip({
   rightLabel: string;
   rightMark: string;
   scores: Record<'X' | 'O', number>;
+  inGameScores?: Record<'X' | 'O', number | string>;
+  inGameUnit?: string;
   turn?: Player;
 }) {
   const { language, t } = useI18n();
-  const formatScore = (score: number) => new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(score);
+  const formatVal = (val: number | string) =>
+    typeof val === 'number'
+      ? new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(val)
+      : val;
+
   return (
     <section className="score-strip">
       <div className={`score-player score-player-x ${scores.X > scores.O ? 'is-leading' : ''}`}>
@@ -76,7 +84,17 @@ export function ScoreStrip({
         </b>
         <span className="score-copy">
           <small>{leftLabel}</small>
-          <strong>{formatScore(scores.X)}</strong>
+          <div className="score-values">
+            <strong className="score-round-val" title={t('roundScore')}>
+              {formatVal(scores.X)}
+            </strong>
+            {inGameScores !== undefined && (
+              <span className="score-ingame-chip" title={t('inGameScore')}>
+                <span className="score-ingame-num">{formatVal(inGameScores.X)}</span>
+                {inGameUnit && <span className="score-ingame-unit">{inGameUnit}</span>}
+              </span>
+            )}
+          </div>
         </span>
       </div>
       <div className="score-divider" aria-hidden="true">
@@ -88,7 +106,17 @@ export function ScoreStrip({
         </b>
         <span className="score-copy">
           <small>{rightLabel}</small>
-          <strong>{formatScore(scores.O)}</strong>
+          <div className="score-values">
+            <strong className="score-round-val" title={t('roundScore')}>
+              {formatVal(scores.O)}
+            </strong>
+            {inGameScores !== undefined && (
+              <span className="score-ingame-chip" title={t('inGameScore')}>
+                <span className="score-ingame-num">{formatVal(inGameScores.O)}</span>
+                {inGameUnit && <span className="score-ingame-unit">{inGameUnit}</span>}
+              </span>
+            )}
+          </div>
         </span>
       </div>
     </section>

@@ -54,6 +54,12 @@
   transform: rotateY(180deg);
   font-size: clamp(25px, 9vw, 40px);
 }
+.memory-card-tile.is-active-flip .card-front {
+  box-shadow: inset 0 0 0 2.5px var(--ink);
+}
+.memory-card-tile.is-last-matched .card-front {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
 .memory-card-tile.is-matched .card-front {
   background: var(--acid);
   box-shadow: inset 0 0 0 2px var(--acid);

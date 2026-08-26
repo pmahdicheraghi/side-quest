@@ -229,19 +229,13 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
         rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
         rightMark="●"
         scores={matchScores}
+        inGameScores={discCounts}
+        inGameUnit={t('discsUnit')}
         turn={turn}
       />
       <section className="reversi-board-wrap">
         <div className="turn-label" role="status" aria-live="polite">
           {status}
-        </div>
-        <div className="reversi-disc-count" aria-label={t('reversiScore')}>
-          <span>
-            {playerName('X')}: {numberFormatter.format(discCounts.X)}
-          </span>
-          <span>
-            {playerName('O')}: {numberFormatter.format(discCounts.O)}
-          </span>
         </div>
         <div className="reversi-board" role="group" aria-label={t('reversiBoard')}>
           {board.map((cell, index) => {

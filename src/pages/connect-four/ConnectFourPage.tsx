@@ -160,6 +160,11 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
         rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
         rightMark="●"
         scores={scores}
+        inGameScores={{
+          X: board.filter((c) => c === 'X').length,
+          O: board.filter((c) => c === 'O').length,
+        }}
+        inGameUnit={t('discsUnit')}
         turn={turn}
       />
       <section className="connect-board-wrap">
@@ -185,7 +190,7 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
                   const mark = board[index];
                   return (
                     <span
-                      className={`connect-cell ${mark.toLowerCase()} ${winningLine.includes(index) ? 'is-winner' : ''} ${row === targetRow ? 'is-target' : ''}`}
+                      className={`connect-cell ${mark.toLowerCase()} ${winningLine.includes(index) ? 'is-winner' : ''} ${lastMove === index ? 'is-last-move' : ''} ${row === targetRow ? 'is-target' : ''}`}
                       data-index={index}
                       key={row}
                       aria-hidden="true"

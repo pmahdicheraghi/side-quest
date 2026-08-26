@@ -90,7 +90,6 @@
 }
 .dots-edge:not(:disabled):focus-visible::before {
   background: var(--acid);
-  box-shadow: 0 0 10px var(--acid-glow-soft);
 }
 .dots-edge.horizontal:not(:disabled):focus-visible::before {
   height: 5px;
@@ -102,7 +101,6 @@
 @media (hover: hover) and (pointer: fine) {
   .dots-edge:not(:disabled):hover::before {
     background: var(--acid);
-    box-shadow: 0 0 10px var(--acid-glow-soft);
   }
 
   .dots-edge.horizontal:not(:disabled):hover::before {
@@ -126,6 +124,9 @@
 .dots-edge.vertical.owner-x::before,
 .dots-edge.vertical.owner-o::before {
   width: 7px;
+}
+.dots-edge.is-last-edge::before {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
 }
 .dots-edge:disabled {
   cursor: default;

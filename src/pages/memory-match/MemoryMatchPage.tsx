@@ -24,7 +24,8 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
   const mode = setup.mode;
   const [cards, setCards] = useState<MemoryCard[]>(createMemoryDeck);
   const [turn, setTurn] = useState<Player>('X');
-  const [scores, setScores] = useState<Record<Player, number>>({ X: 0, O: 0 });
+  const [matchScores, setMatchScores] = useState<Record<Player, number>>({ X: 0, O: 0 });
+  const [roundScores, setRoundScores] = useState<Record<Player, number>>({ X: 0, O: 0 });
   const [selected, setSelected] = useState<number[]>([]);
   const [lastMatched, setLastMatched] = useState<number[]>([]);
   const [lock, setLock] = useState(false);
@@ -81,19 +82,14 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
     setCards(createMemoryDeck());
     botMemory.current = new Map();
     setTurn(getRoundStarter(nextRound));
-    if (!keepScore) setScores({ X: 0, O: 0 });
+    if (!keepScore) setMatchScores({ X: 0, O: 0 });
+    setRoundScores({ X: 0, O: 0 });
     setRound(nextRound);
     setSelected([]);
     setLastMatched([]);
     setLock(false);
     setMatchedPairs(0);
   };
-
-  useEffect(() => {
-    if (matchedPairs !== MEMORY_SYMBOLS.length || round >= setup.rounds) return;
-    const timeout = window.setTimeout(() => resetBoard({ keepScore: true, advanceRound: true }), 1600);
-    return () => window.clearTimeout(timeout);
-  }, [matchedPairs, round, setup.rounds]);
 
   const resolvePair = (first: number, second: number, currentCards: MemoryCard[], humanTurn: boolean) => {
     const matched = resolveMemoryPair(currentCards, first, second, turn).matched;
@@ -102,10 +98,24 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
         if (matched) {
           setCards((current) => resolveMemoryPair(current, first, second, turn).cards);
           botMemory.current = forgetCards(botMemory.current, [first, second]);
-          setScores((current) => ({ ...current, [turn]: current[turn] + 1 }));
-          setMatchedPairs((current) => current + 1);
+          const nextPairs = matchedPairs + 1;
+          const nextRoundScores = { ...roundScores, [turn]: roundScores[turn] + 1 };
+          setRoundScores(nextRoundScores);
+          setMatchedPairs(nextPairs);
           setLastMatched([first, second]);
           if (humanTurn) triggerHaptic([12, 25, 12]);
+
+          if (nextPairs === MEMORY_SYMBOLS.length) {
+            const roundWinner: Player | 'draw' =
+              nextRoundScores.X === nextRoundScores.O
+                ? 'draw'
+                : nextRoundScores.X > nextRoundScores.O
+                  ? 'X'
+                  : 'O';
+            if (roundWinner !== 'draw') {
+              setMatchScores((current) => ({ ...current, [roundWinner]: current[roundWinner] + 1 }));
+            }
+          }
         } else {
           setCards((current) => resolveMemoryPair(current, first, second, turn).cards);
           setTurn((current) => (current === 'X' ? 'O' : 'X'));
@@ -117,6 +127,12 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
       matched ? 420 : 900,
     );
   };
+
+  useEffect(() => {
+    if (matchedPairs !== MEMORY_SYMBOLS.length || round >= setup.rounds) return;
+    const timeout = window.setTimeout(() => resetBoard({ keepScore: true, advanceRound: true }), 1600);
+    return () => window.clearTimeout(timeout);
+  }, [matchedPairs, round, setup.rounds]);
 
   const flip = (index: number) => {
     const card = cards[index];
@@ -140,11 +156,9 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
   const playerName = (player: Player) => t(player === 'X' ? 'player1' : mode === 'bot' ? 'bot' : 'player2');
   const status = finished
     ? matchComplete
-      ? scores.X > scores.O
-        ? t('winsMatch', { player: playerName('X') })
-        : scores.X < scores.O
-          ? t('winsMatch', { player: playerName('O') })
-          : t('matchTie')
+      ? matchScores.X === matchScores.O
+        ? t('matchDraw')
+        : t('winsMatch', { player: playerName(matchScores.X > matchScores.O ? 'X' : 'O') })
       : t('deckComplete')
     : lock
       ? t('checkingPair')
@@ -165,7 +179,9 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
         leftMark="✦"
         rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
         rightMark="●"
-        scores={scores}
+        scores={matchScores}
+        inGameScores={roundScores}
+        inGameUnit={t('pairsUnit')}
         turn={turn}
       />
       <div className="memory-status" role="status" aria-live="polite">
@@ -175,7 +191,7 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
         {cards.map((card, index) => (
           <button
             type="button"
-            className={`memory-card-tile ${card.flipped || card.matched ? 'is-flipped' : ''} ${card.matched ? `is-matched matched-${card.matchedBy?.toLowerCase()}` : ''}`}
+            className={`memory-card-tile ${card.flipped || card.matched ? 'is-flipped' : ''} ${card.matched ? `is-matched matched-${card.matchedBy?.toLowerCase()}` : ''} ${selected.includes(index) ? 'is-active-flip' : ''} ${lastMatched.includes(index) ? 'is-last-matched' : ''}`}
             data-card-index={index}
             key={index}
             onClick={() => flip(index)}
