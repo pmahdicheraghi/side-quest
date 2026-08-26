@@ -68,6 +68,7 @@ The menu currently includes:
 - **Reaction Duel** — wait for the green signal; the first valid tap wins and an early tap forfeits the round.
 - **Connect Four** — drop discs into seven columns, build a line of four, and block the opponent.
 - **Dots & Boxes** — claim edges, close boxes for extra turns, and control chains against a bot or friend.
+- **Othello** — trap opponent discs between yours, flip entire lines, and claim the board against a bot or friend.
 
 Every game supports bot and local two-player modes. Status changes are announced to assistive technology, keyboard focus is visible, and nonessential animation follows the system’s reduced-motion preference.
 
@@ -90,6 +91,7 @@ src/
     reaction-duel/      Reaction Duel state, bot, and UI
     connect-four/       Connect Four rules, minimax bot, and UI
     dots-boxes/         Dots & Boxes rules, bot tactics, and board UI
+    reversi/            Reversi rules, minimax bot, and board UI
     settings/           preferences screen and toggle controls
   styles/
     global.css          tokens, typography, menu, shared layout, and accessibility

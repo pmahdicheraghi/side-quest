@@ -64,6 +64,11 @@
   --dots-card-bg: #78c8e3;
   --dots-card-ink: #152a33;
   --dots-card-muted: rgba(21, 42, 51, 0.66);
+  --reversi-card-bg: #4fd18c;
+  --reversi-card-ink: #0f2b1d;
+  --reversi-card-muted: rgba(15, 43, 29, 0.68);
+  --reversi-board-bg: #143527;
+  --reversi-valid-dot: rgba(214, 243, 106, 0.55);
   --switch-bg: #25312d;
   --switch-thumb: #839088;
   --switch-thumb-ink: #26322c;
@@ -344,7 +349,7 @@ p {
 }
 .score-strip strong {
   color: var(--ink);
-  font-size: 29px;
+  font-size: 26px;
   font-weight: 500;
   letter-spacing: -0.05em;
   line-height: 1;
@@ -395,7 +400,7 @@ p {
     font-size: 17px;
   }
   .score-strip strong {
-    font-size: 26px;
+    font-size: 24px;
   }
   .score-divider {
     flex-basis: 20px;
@@ -736,6 +741,13 @@ h1 em {
 .dots-card .game-number {
   color: var(--dots-card-muted);
 }
+.reversi-card {
+  background: var(--reversi-card-bg);
+  color: var(--reversi-card-ink);
+}
+.reversi-card .game-number {
+  color: var(--reversi-card-muted);
+}
 .reaction-visual {
   display: grid;
   place-items: center;
@@ -840,6 +852,33 @@ h1 em {
 .dots-preview-dot:nth-child(3n)::after,
 .dots-preview-dot:nth-child(5n)::before {
   color: var(--acid);
+}
+.reversi-visual {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 7px;
+  padding: 24px 18px 86px;
+  transform: rotate(5deg) scale(1.04);
+  opacity: 0.4;
+}
+.reversi-visual span {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(15, 43, 29, 0.25);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.2);
+}
+.reversi-visual .reversi-dot-dark {
+  background: #11281c;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+}
+.reversi-visual .reversi-dot-light {
+  background: #f1f6ec;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    0 2px 4px rgba(0, 0, 0, 0.3);
 }
 .card-copy {
   position: absolute;

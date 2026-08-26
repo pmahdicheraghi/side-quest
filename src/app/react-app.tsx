@@ -8,6 +8,7 @@ import { MemoryMatchPage } from '../pages/memory-match/MemoryMatchPage';
 import { ReactionDuelPage } from '../pages/reaction-duel/ReactionDuelPage';
 import { ConnectFourPage } from '../pages/connect-four/ConnectFourPage';
 import { DotsBoxesPage } from '../pages/dots-boxes/DotsBoxesPage';
+import { ReversiPage } from '../pages/reversi/ReversiPage';
 import { GameSetupDialog } from '../components/GameSetupDialog';
 import { translate, useI18n, type Language } from './i18n';
 import { animateIn } from './animation';
@@ -83,7 +84,14 @@ export function ReactApp(): ReactElement {
   };
   const navigate = (nextView: View) => {
     musicRef.current?.handleGesture();
-    if (nextView === 'tic' || nextView === 'memory' || nextView === 'reaction' || nextView === 'connect' || nextView === 'dots') {
+    if (
+      nextView === 'tic' ||
+      nextView === 'memory' ||
+      nextView === 'reaction' ||
+      nextView === 'connect' ||
+      nextView === 'dots' ||
+      nextView === 'reversi'
+    ) {
       setPendingGame(nextView);
       return;
     }
@@ -144,6 +152,7 @@ export function ReactApp(): ReactElement {
       {view === 'reaction' && <ReactionDuelPage setup={gameSetup} onExit={returnToMenu} />}
       {view === 'connect' && <ConnectFourPage setup={gameSetup} onExit={returnToMenu} />}
       {view === 'dots' && <DotsBoxesPage setup={gameSetup} onExit={returnToMenu} />}
+      {view === 'reversi' && <ReversiPage setup={gameSetup} onExit={returnToMenu} />}
       {pendingGame && (
         <GameSetupDialog
           gameTitle={gameTitle(pendingGame, language)}
@@ -171,7 +180,8 @@ function viewFromHistory(state: unknown): View | null {
     value === 'memory' ||
     value === 'reaction' ||
     value === 'connect' ||
-    value === 'dots'
+    value === 'dots' ||
+    value === 'reversi'
     ? value
     : null;
 }
@@ -181,7 +191,8 @@ function gameTitle(view: Exclude<View, 'menu' | 'settings'>, language: Language)
   if (view === 'memory') return translate(language, 'memoryMatch');
   if (view === 'reaction') return translate(language, 'reactionDuel');
   if (view === 'connect') return translate(language, 'connectFour');
-  return translate(language, 'dotsBoxes');
+  if (view === 'dots') return translate(language, 'dotsBoxes');
+  return translate(language, 'reversi');
 }
 
 function MenuPage({
@@ -404,6 +415,30 @@ function MenuPage({
           }
           onSelect={onNavigate}
         />
+        <GameCard
+          view="reversi"
+          number={t('territory')}
+          title={t('reversi')}
+          description={t('reversiDescription')}
+          cardClass="reversi-card"
+          visual={Array.from({ length: 24 }, (_, index) => (
+            <span
+              className={[7, 8, 14].includes(index) ? 'reversi-dot-dark' : [9, 15, 16].includes(index) ? 'reversi-dot-light' : ''}
+              key={index}
+            />
+          ))}
+          firstMeta={
+            <>
+              <Icon name="grid" /> {t('sixtyFourTiles')}
+            </>
+          }
+          secondMeta={
+            <>
+              <Icon name="bot" /> {t('vsBot')}
+            </>
+          }
+          onSelect={onNavigate}
+        />
       </section>
 
       <footer className="menu-footer">
@@ -448,7 +483,9 @@ function GameCard({
           ? 'reaction-visual'
           : view === 'connect'
             ? 'connect-visual'
-            : 'dots-visual';
+            : view === 'dots'
+              ? 'dots-visual'
+              : 'reversi-visual';
 
   return (
     <button type="button" className={`game-card ${cardClass}`} onClick={() => onSelect(view)}>
