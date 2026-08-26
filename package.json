@@ -7,7 +7,6 @@
     "dev": "vite --host",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host",
-    "check:pwa-update": "node --experimental-strip-types src/app/usePwaUpdate.check.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"public/**/*.{js,webmanifest}\" \"*.{html,json,md,js}\"",

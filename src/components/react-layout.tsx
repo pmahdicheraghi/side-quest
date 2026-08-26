@@ -2,6 +2,8 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { iconPaths } from '../app/icons';
 import { useI18n } from '../app/i18n';
 import { Player } from '../app/types';
+import { CelebrationBurst } from './CelebrationBurst';
+import { playTapSound, playWinSound } from '../app/sfx';
 
 export function Icon({ name, className = 'icon' }: { name: string; className?: string }) {
   return (
@@ -135,10 +137,25 @@ export function GameActions({
   const { t } = useI18n();
   return (
     <div className="game-actions">
-      <button type="button" className="primary-btn" onClick={onReset} disabled={resetDisabled}>
+      <button
+        type="button"
+        className="primary-btn"
+        onClick={() => {
+          playTapSound();
+          onReset();
+        }}
+        disabled={resetDisabled}
+      >
         {resetLabel} <Icon name="arrow" />
       </button>
-      <button type="button" className="text-btn" onClick={onExit}>
+      <button
+        type="button"
+        className="text-btn"
+        onClick={() => {
+          playTapSound();
+          onExit();
+        }}
+      >
         {t('quitToMenu')}
       </button>
     </div>
@@ -152,6 +169,7 @@ export function MatchResultToast({ message }: { message: string }) {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
+    playWinSound();
     const timeout = window.setTimeout(() => setVisible(false), MATCH_RESULT_DURATION);
     return () => window.clearTimeout(timeout);
   }, []);
@@ -159,15 +177,18 @@ export function MatchResultToast({ message }: { message: string }) {
   if (!visible) return null;
 
   return (
-    <div className="match-result-toast" role="status" aria-live="assertive" aria-atomic="true">
-      <span className="match-result-toast-spark" aria-hidden="true">
-        ✦
-      </span>
-      <span>
-        <small>{t('matchComplete')}</small>
-        <strong>{message}</strong>
-      </span>
-    </div>
+    <>
+      <CelebrationBurst />
+      <div className="match-result-toast" role="status" aria-live="assertive" aria-atomic="true">
+        <span className="match-result-toast-spark" aria-hidden="true">
+          ✦
+        </span>
+        <span>
+          <small>{t('matchComplete')}</small>
+          <strong>{message}</strong>
+        </span>
+      </div>
+    </>
   );
 }
 

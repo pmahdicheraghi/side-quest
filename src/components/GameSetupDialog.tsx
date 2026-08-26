@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactElement } from 'react';
 import type { GameDifficulty, GameRounds, GameSetup } from '../app/types';
 import { Icon } from './react-layout';
 import { useI18n, type TranslationKey } from '../app/i18n';
+import { playTapSound } from '../app/sfx';
 
 type PlayOption = GameDifficulty | 'two';
 
@@ -16,11 +17,13 @@ const ROUND_OPTIONS: GameRounds[] = [1, 3, 5];
 export function GameSetupDialog({
   gameTitle,
   initialSetup,
+  themeClass = '',
   onCancel,
   onStart,
 }: {
   gameTitle: string;
   initialSetup: GameSetup;
+  themeClass?: string;
   onCancel: () => void;
   onStart: (setup: GameSetup) => void;
 }): ReactElement {
@@ -38,7 +41,7 @@ export function GameSetupDialog({
   return (
     <dialog
       ref={dialogRef}
-      className="setup-dialog"
+      className={`setup-dialog ${themeClass}`.trim()}
       aria-labelledby="setup-title"
       onCancel={(event) => {
         event.preventDefault();
@@ -49,7 +52,15 @@ export function GameSetupDialog({
       }}
     >
       <div className="setup-dialog-card">
-        <button type="button" className="setup-close" onClick={onCancel} aria-label={t('closeSetup')}>
+        <button
+          type="button"
+          className="setup-close"
+          onClick={() => {
+            playTapSound();
+            onCancel();
+          }}
+          aria-label={t('closeSetup')}
+        >
           ×
         </button>
         <div className="setup-eyebrow">{t('newQuest')}</div>
@@ -65,7 +76,10 @@ export function GameSetupDialog({
                 className={`setup-option play-option play-option-${option.value === 'two' ? 'two' : 'bot'} ${playOption === option.value ? 'is-selected' : ''}`}
                 aria-pressed={playOption === option.value}
                 key={option.value}
-                onClick={() => setPlayOption(option.value)}
+                onClick={() => {
+                  playTapSound();
+                  setPlayOption(option.value);
+                }}
               >
                 <Icon name={option.value === 'two' ? 'users' : 'bot'} />
                 <span>
@@ -85,7 +99,10 @@ export function GameSetupDialog({
                 className={`setup-option ${rounds === option ? 'is-selected' : ''}`}
                 aria-pressed={rounds === option}
                 key={option}
-                onClick={() => setRounds(option)}
+                onClick={() => {
+                  playTapSound();
+                  setRounds(option);
+                }}
               >
                 <strong>{new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(option)}</strong>
                 <small>{t(option === 1 ? 'round' : 'rounds')}</small>
@@ -95,19 +112,27 @@ export function GameSetupDialog({
         </fieldset>
 
         <div className="setup-actions">
-          <button type="button" className="text-btn" onClick={onCancel}>
+          <button
+            type="button"
+            className="text-btn"
+            onClick={() => {
+              playTapSound();
+              onCancel();
+            }}
+          >
             {t('cancel')}
           </button>
           <button
             type="button"
             className="primary-btn"
-            onClick={() =>
+            onClick={() => {
+              playTapSound();
               onStart({
                 mode: playOption === 'two' ? 'two' : 'bot',
                 difficulty: playOption === 'two' ? initialSetup.difficulty : playOption,
                 rounds,
-              })
-            }
+              });
+            }}
             autoFocus
           >
             {t('startGame')} <Icon name="arrow" />

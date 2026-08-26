@@ -31,15 +31,12 @@
   width: min(100%, 420px);
   aspect-ratio: 1;
   margin: auto;
-  padding: 7px;
+  padding: 8px;
   display: grid;
   grid-template-columns: 20px 1fr 20px 1fr 20px 1fr 20px 1fr 20px;
   grid-template-rows: 20px 1fr 20px 1fr 20px 1fr 20px 1fr 20px;
   align-items: stretch;
   justify-items: stretch;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--surface-subtle);
 }
 
 .dots-dot {
@@ -51,7 +48,6 @@
   z-index: 3;
   border-radius: 50%;
   background: var(--ink);
-  box-shadow: 0 2px 7px var(--shadow-card);
 }
 
 .dots-edge {
@@ -70,7 +66,6 @@
   background: var(--line-strong);
   transition:
     background 150ms ease,
-    box-shadow 150ms ease,
     width 150ms ease,
     height 150ms ease;
 }
@@ -125,9 +120,6 @@
 .dots-edge.vertical.owner-o::before {
   width: 7px;
 }
-.dots-edge.is-last-edge::before {
-  box-shadow: inset 0 0 0 1.5px var(--ink);
-}
 .dots-edge:disabled {
   cursor: default;
 }
@@ -157,7 +149,7 @@
     --dots-edge-overhang: 13px;
     grid-template-columns: 26px 1fr 26px 1fr 26px 1fr 26px;
     grid-template-rows: 26px 1fr 26px 1fr 26px 1fr 26px;
-    padding: 5px;
+    padding: 6px;
   }
   .dots-box {
     margin: 2px;

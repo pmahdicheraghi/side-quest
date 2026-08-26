@@ -27,17 +27,14 @@
   font-size: 15px;
   transition:
     background 0.2s,
-    border-color 0.2s,
-    box-shadow 0.2s;
+    border-color 0.2s;
 }
 .signal-orb.signal-go {
   color: var(--reaction-go-ink);
   background: var(--acid);
-  border-color: var(--acid);
-  box-shadow:
-    0 0 0 12px var(--acid-tint),
-    0 0 42px var(--acid-glow);
-  font-size: 18px;
+  border: 3px solid var(--acid);
+  font-size: 20px;
+  font-weight: 700;
 }
 .reaction-status {
   color: var(--muted);

@@ -5,6 +5,7 @@ import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
 import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { playMoveSound, playPairSound } from '../../app/sfx';
 import {
   chooseConnectBotColumn,
   CONNECT_COLUMNS,
@@ -39,7 +40,10 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
     setWinner(result);
     setWinningLine(getConnectWinningLine(finalBoard) ?? []);
     if (result !== 'draw') setScores((current) => ({ ...current, [result]: current[result] + 1 }));
-    if (human) triggerHaptic([18, 35, 18]);
+    if (human) {
+      triggerHaptic([18, 35, 18]);
+      playPairSound();
+    }
   };
 
   const settleResult = (result: Player | 'draw', finalBoard: ConnectCell[], human: boolean) => {
@@ -85,6 +89,7 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
       if (!move) return;
       setBoard(move.board);
       setLastMove(move.index);
+      playMoveSound(true);
       const result = getConnectResult(move.board);
       if (result) settleResult(result, move.board, false);
       else setTurn('X');
@@ -125,6 +130,7 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
     setBoard(move.board);
     setLastMove(move.index);
     triggerHaptic();
+    playMoveSound(turn === 'O');
     const result = getConnectResult(move.board);
     if (result) settleResult(result, move.board, true);
     else setTurn(turn === 'X' ? 'O' : 'X');
@@ -145,7 +151,7 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
       : t('playerTurn', { player: playerName(turn) });
 
   return (
-    <main className="shell game-screen connect-screen">
+    <main className="shell game-screen connect-screen theme-connect">
       <GameHeader
         title={t('connectFour')}
         statIcon="grid"
@@ -190,7 +196,7 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
                   const mark = board[index];
                   return (
                     <span
-                      className={`connect-cell ${mark.toLowerCase()} ${winningLine.includes(index) ? 'is-winner' : ''} ${lastMove === index ? 'is-last-move' : ''} ${row === targetRow ? 'is-target' : ''}`}
+                      className={`connect-cell ${mark.toLowerCase()} ${winningLine.includes(index) ? 'is-winner' : ''} ${row === targetRow ? 'is-target' : ''}`}
                       data-index={index}
                       key={row}
                       aria-hidden="true"

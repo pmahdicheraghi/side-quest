@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import anime from 'animejs';
-import { animateIn, motionEnabled } from '../../app/animation';
+import { animateIn } from '../../app/animation';
+import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
+import { playErrorSound, playPairSound, playTapSound } from '../../app/sfx';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
 import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
-import './memory-match.css';
-import { useI18n } from '../../app/i18n';
 import {
   chooseMemoryBotCard,
   createMemoryDeck,
@@ -18,6 +17,7 @@ import {
   type BotMemory,
   type MemoryCard,
 } from './memory-match-logic';
+import './memory-match.css';
 
 export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: () => void }) {
   const { language, t } = useI18n();
@@ -27,24 +27,14 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
   const [matchScores, setMatchScores] = useState<Record<Player, number>>({ X: 0, O: 0 });
   const [roundScores, setRoundScores] = useState<Record<Player, number>>({ X: 0, O: 0 });
   const [selected, setSelected] = useState<number[]>([]);
-  const [lastMatched, setLastMatched] = useState<number[]>([]);
   const [lock, setLock] = useState(false);
   const [matchedPairs, setMatchedPairs] = useState(0);
   const [round, setRound] = useState(1);
   const pairTimeout = useRef<number | null>(null);
   const botMemory = useRef<BotMemory>(new Map());
 
-  useEffect(() => animateIn('.score-strip, .memory-status, .memory-grid, .game-actions, .tip'), []);
-  useEffect(() => {
-    if (!lastMatched.length || !motionEnabled()) return;
-    anime({
-      targets: lastMatched.map((index) => `.memory-card-tile[data-card-index="${index}"]`).join(', '),
-      scale: [1, 0.96, 1],
-      delay: anime.stagger(90),
-      duration: 420,
-      easing: 'easeOutCubic',
-    });
-  }, [lastMatched]);
+  useEffect(() => animateIn('.score-strip, .memory-grid, .game-actions, .tip'), []);
+
   useEffect(
     () => () => {
       if (pairTimeout.current) window.clearTimeout(pairTimeout.current);
@@ -63,6 +53,7 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
         const next = revealMemoryCard(cards, choice);
         botMemory.current = rememberCard(botMemory.current, choice, cards[choice].symbol);
         setCards(next);
+        playTapSound();
         if (first === null) {
           setSelected([choice]);
         } else {
@@ -86,7 +77,6 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
     setRoundScores({ X: 0, O: 0 });
     setRound(nextRound);
     setSelected([]);
-    setLastMatched([]);
     setLock(false);
     setMatchedPairs(0);
   };
@@ -96,13 +86,13 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
     pairTimeout.current = window.setTimeout(
       () => {
         if (matched) {
+          playPairSound();
           setCards((current) => resolveMemoryPair(current, first, second, turn).cards);
           botMemory.current = forgetCards(botMemory.current, [first, second]);
           const nextPairs = matchedPairs + 1;
           const nextRoundScores = { ...roundScores, [turn]: roundScores[turn] + 1 };
           setRoundScores(nextRoundScores);
           setMatchedPairs(nextPairs);
-          setLastMatched([first, second]);
           if (humanTurn) triggerHaptic([12, 25, 12]);
 
           if (nextPairs === MEMORY_SYMBOLS.length) {
@@ -113,9 +103,12 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
             }
           }
         } else {
+          if (humanTurn) {
+            playErrorSound();
+            triggerHaptic(3);
+          }
           setCards((current) => resolveMemoryPair(current, first, second, turn).cards);
           setTurn((current) => (current === 'X' ? 'O' : 'X'));
-          if (humanTurn) triggerHaptic(3);
         }
         setSelected([]);
         setLock(false);
@@ -139,8 +132,7 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
     setCards(nextCards);
     setSelected(nextSelected);
     triggerHaptic();
-    if (motionEnabled())
-      anime({ targets: `.memory-card-tile[data-card-index="${index}"]`, scale: [0.92, 1], duration: 220, easing: 'easeOutBack' });
+    playTapSound();
     if (nextSelected.length === 2) {
       setLock(true);
       resolvePair(nextSelected[0], nextSelected[1], nextCards, true);
@@ -161,7 +153,7 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
       : t('flipTwo', { player: playerName(turn) });
 
   return (
-    <main className="shell game-screen memory-screen">
+    <main className="shell game-screen memory-screen theme-memory">
       <GameHeader
         title={t('memoryMatch')}
         statIcon="grid"
@@ -187,7 +179,7 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
         {cards.map((card, index) => (
           <button
             type="button"
-            className={`memory-card-tile ${card.flipped || card.matched ? 'is-flipped' : ''} ${card.matched ? `is-matched matched-${card.matchedBy?.toLowerCase()}` : ''} ${selected.includes(index) ? 'is-active-flip' : ''} ${lastMatched.includes(index) ? 'is-last-matched' : ''}`}
+            className={`memory-card-tile ${card.flipped || card.matched ? 'is-flipped' : ''} ${card.matched ? `is-matched matched-${card.matchedBy?.toLowerCase()}` : ''}`}
             data-card-index={index}
             key={index}
             onClick={() => flip(index)}

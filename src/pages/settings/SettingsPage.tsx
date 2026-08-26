@@ -4,6 +4,7 @@ import { Settings, SettingKey } from '../../app/settings';
 import { Icon } from '../../components/react-layout';
 import { useI18n, type TranslationKey } from '../../app/i18n';
 import { LanguageSelect } from '../../components/LanguageSelect';
+import { playTapSound } from '../../app/sfx';
 import './settings.css';
 
 type SettingOption = { key: SettingKey; label: TranslationKey; description: TranslationKey };
@@ -30,7 +31,15 @@ export function SettingsPage({
   return (
     <main className="shell settings-screen">
       <header className="topbar settings-topbar">
-        <button type="button" className="icon-btn" onClick={onBack} aria-label={t('backToMenu')}>
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={() => {
+            playTapSound();
+            onBack();
+          }}
+          aria-label={t('backToMenu')}
+        >
           <Icon name="back" />
         </button>
         <span className="topbar-title">{t('settings')}</span>
@@ -67,7 +76,10 @@ export function SettingsPage({
               role="switch"
               aria-checked={settings[option.key]}
               aria-label={t(option.label)}
-              onClick={() => onChange(option.key)}
+              onClick={() => {
+                playTapSound();
+                onChange(option.key);
+              }}
             >
               <span className="switch-thumb" />
               <span className="sr-only">{t(settings[option.key] ? 'on' : 'off')}</span>
@@ -79,7 +91,14 @@ export function SettingsPage({
       <p className="settings-version">
         {t('version', { version: __APP_RELEASE__ })} · {t('build', { build: __APP_COMMIT__ })}
       </p>
-      <button type="button" className="text-btn settings-back" onClick={onBack}>
+      <button
+        type="button"
+        className="text-btn settings-back"
+        onClick={() => {
+          playTapSound();
+          onBack();
+        }}
+      >
         {t('backToMenuAction')} <Icon name="arrow" />
       </button>
     </main>

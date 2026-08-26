@@ -6,6 +6,7 @@ import type { GameSetup, Player } from '../../app/types';
 import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import './reaction-duel.css';
 import { useI18n } from '../../app/i18n';
+import { playErrorSound, playMoveSound, playPairSound } from '../../app/sfx';
 import {
   getBotReactionDelay,
   getReactionMatchWinner,
@@ -33,6 +34,7 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
     if (phase !== 'waiting') return;
     timer.current = window.setTimeout(() => {
       setPhase('go');
+      playMoveSound(false);
       goAt.current = performance.now();
       if (motionEnabled()) anime({ targets: '.signal-orb', scale: [0.8, 1.12, 1], duration: 360, easing: 'easeOutBack' });
     }, getReactionWaitDelay());
@@ -74,7 +76,10 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
   const tap = (player: Player) => {
     const attempt = resolveReactionAttempt(phase, player, goAt.current, performance.now(), Boolean(reactions[player]));
     if (attempt.kind === 'false-start') {
-      if (!(mode === 'bot' && player === 'O')) triggerHaptic([28, 40, 28]);
+      if (!(mode === 'bot' && player === 'O')) {
+        playErrorSound();
+        triggerHaptic([28, 40, 28]);
+      }
       setFalseStart(attempt.falseStart);
       setWinner(attempt.winner);
       setPhase('result');
@@ -83,7 +88,10 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
       return;
     }
     if (attempt.kind !== 'reaction') return;
-    if (!(mode === 'bot' && player === 'O')) triggerHaptic([18, 35, 18]);
+    if (!(mode === 'bot' && player === 'O')) {
+      playPairSound();
+      triggerHaptic([18, 35, 18]);
+    }
     setReactions((current) => ({ ...current, [player]: attempt.reaction }));
     setWinner(attempt.winner);
     setScores((current) => ({ ...current, [attempt.winner]: current[attempt.winner] + 1 }));
@@ -126,7 +134,7 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
   const running = phase === 'waiting' || phase === 'go';
 
   return (
-    <main className="shell game-screen reaction-screen">
+    <main className="shell game-screen reaction-screen theme-reaction">
       <GameHeader
         title={t('reactionDuel')}
         statIcon="spark"

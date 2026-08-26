@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactElement, type ReactNode } from '
 import { applySettings, loadSettings, saveSettings, type SettingKey, type Settings } from './settings';
 import type { GameSetup, View } from './types';
 import { MusicController } from './music';
+import { unlockAudio, playTapSound } from './sfx';
 import { SettingsPage } from '../pages/settings/SettingsPage';
 import { TicTacToePage } from '../pages/tic-tac-toe/TicTacToePage';
 import { MemoryMatchPage } from '../pages/memory-match/MemoryMatchPage';
@@ -84,6 +85,7 @@ export function ReactApp(): ReactElement {
   };
   const navigate = (nextView: View) => {
     musicRef.current?.handleGesture();
+    unlockAudio();
     if (
       nextView === 'tic' ||
       nextView === 'memory' ||
@@ -131,8 +133,14 @@ export function ReactApp(): ReactElement {
   return (
     <div
       className="react-content"
-      onClick={() => musicRef.current?.handleGesture()}
-      onPointerDown={() => musicRef.current?.handleGesture()}
+      onClick={() => {
+        musicRef.current?.handleGesture();
+        unlockAudio();
+      }}
+      onPointerDown={() => {
+        musicRef.current?.handleGesture();
+        unlockAudio();
+      }}
     >
       {view === 'menu' && (
         <MenuPage
@@ -157,6 +165,7 @@ export function ReactApp(): ReactElement {
         <GameSetupDialog
           gameTitle={gameTitle(pendingGame, language)}
           initialSetup={gameSetup}
+          themeClass={`theme-${pendingGame}`}
           onCancel={() => setPendingGame(null)}
           onStart={startGame}
         />
@@ -376,7 +385,9 @@ function MenuPage({
           cardClass="connect-card"
           visual={Array.from({ length: 28 }, (_, index) => (
             <span
-              className={[3, 9, 15, 21].includes(index) ? 'connect-dot-one' : [10, 16, 22, 23].includes(index) ? 'connect-dot-two' : ''}
+              className={
+                [3, 9, 15, 21].includes(index) ? 'connect-dot-one' : [10, 16, 17, 22, 23, 24].includes(index) ? 'connect-dot-two' : ''
+              }
               key={index}
             />
           ))}
@@ -488,7 +499,14 @@ function GameCard({
               : 'reversi-visual';
 
   return (
-    <button type="button" className={`game-card ${cardClass}`} onClick={() => onSelect(view)}>
+    <button
+      type="button"
+      className={`game-card ${cardClass}`}
+      onClick={() => {
+        playTapSound();
+        onSelect(view);
+      }}
+    >
       <div className="card-top">
         <span className="game-number">{number}</span>
         <span className="card-arrow">

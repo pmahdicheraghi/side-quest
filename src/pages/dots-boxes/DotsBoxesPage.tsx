@@ -5,6 +5,7 @@ import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
 import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { playMoveSound, playPairSound } from '../../app/sfx';
 import {
   chooseDotsBotEdge,
   countOwnedBoxes,
@@ -37,16 +38,6 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
   const numberFormatter = new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en');
 
   useEffect(() => animateIn('.score-strip, .dots-board-wrap, .game-actions, .tip'), []);
-
-  useEffect(() => {
-    if (!lastEdge || !motionEnabled()) return;
-    anime({
-      targets: `.dots-edge[data-edge="${lastEdge}"]`,
-      scale: [0.45, 1],
-      duration: 240,
-      easing: 'easeOutBack',
-    });
-  }, [lastEdge]);
 
   useEffect(() => {
     if (!newBoxes.length || !motionEnabled()) return;
@@ -88,6 +79,11 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
     setLastEdge(edge);
     setNewBoxes(completed);
     setLastClaimCount(completed.length);
+    if (completed.length) {
+      playPairSound();
+    } else {
+      playMoveSound(player === 'O');
+    }
     if (human) triggerHaptic(completed.length ? [14, 24, 14] : 4);
 
     if (isDotsBoardComplete(nextEdges)) {
@@ -154,7 +150,7 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
         : t('playerTurn', { player: playerName(turn) });
 
   return (
-    <main className="shell game-screen dots-screen">
+    <main className="shell game-screen dots-screen theme-dots">
       <GameHeader
         title={t('dotsBoxes')}
         statIcon="grid"
@@ -216,7 +212,7 @@ type BoardRenderProps = {
   t: ReturnType<typeof useI18n>['t'];
 };
 
-function renderBoard({ edges, boxes, lastEdge, disabled, playerName, numberFormatter, onPlay, t }: BoardRenderProps): ReactNode[] {
+function renderBoard({ edges, boxes, disabled, playerName, numberFormatter, onPlay, t }: BoardRenderProps): ReactNode[] {
   return Array.from({ length: DOT_BOX_SIZE * 2 + 1 }, (_, gridRow) =>
     Array.from({ length: DOT_BOX_SIZE * 2 + 1 }, (_, gridColumn) => {
       const key = `${gridRow}-${gridColumn}`;
@@ -246,7 +242,7 @@ function renderBoard({ edges, boxes, lastEdge, disabled, playerName, numberForma
       return (
         <button
           type="button"
-          className={`dots-edge ${horizontal ? 'horizontal' : 'vertical'} ${owner ? `owner-${owner.toLowerCase()}` : ''} ${edge === lastEdge ? 'is-last-edge' : ''}`}
+          className={`dots-edge ${horizontal ? 'horizontal' : 'vertical'} ${owner ? `owner-${owner.toLowerCase()}` : ''}`}
           data-edge={edge}
           key={key}
           onClick={() => onPlay(edge)}

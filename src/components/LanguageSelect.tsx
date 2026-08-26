@@ -1,11 +1,13 @@
 import type { ChangeEvent, ReactElement } from 'react';
 import { useI18n, type Language } from '../app/i18n';
 import { Icon } from './react-layout';
+import { playTapSound } from '../app/sfx';
 
 export function LanguageSelect(): ReactElement {
   const { language, setLanguage, t } = useI18n();
 
   const changeLanguage = (event: ChangeEvent<HTMLSelectElement>) => {
+    playTapSound();
     setLanguage(event.target.value as Language);
   };
 

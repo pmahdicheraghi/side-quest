@@ -73,7 +73,8 @@
 }
 .language-select select:focus-visible {
   border-color: var(--acid);
-  box-shadow: 0 0 0 2px var(--acid-border-subtle);
+  outline: 2px solid var(--acid);
+  outline-offset: 1px;
 }
 .language-select .icon {
   position: absolute;
@@ -104,8 +105,7 @@ html[dir='rtl'] .language-select .icon {
   transition:
     transform 0.2s ease,
     background 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
+    border-color 0.25s ease;
 }
 .settings-switch.is-on {
   border-color: var(--acid);
@@ -129,8 +129,7 @@ html[dir='rtl'] .language-select .icon {
   background: var(--switch-thumb);
   transition:
     transform 0.28s cubic-bezier(0.2, 0.8, 0.25, 1.2),
-    background 0.25s ease,
-    box-shadow 0.25s ease;
+    background 0.25s ease;
 }
 .switch-thumb::after {
   color: var(--switch-thumb-ink);

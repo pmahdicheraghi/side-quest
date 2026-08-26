@@ -5,6 +5,7 @@ import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
 import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { playMoveSound, playPairSound } from '../../app/sfx';
 import { chooseReversiBotMove, countDiscs, createReversiBoard, getValidMoves, makeMove, type ReversiCell } from './reversi-logic';
 import './reversi.css';
 
@@ -16,7 +17,6 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
   const [board, setBoard] = useState<ReversiCell[]>(createReversiBoard);
   const [turn, setTurn] = useState<Player>('X');
   const [roundWinner, setRoundWinner] = useState<Player | 'draw' | null>(null);
-  const [lastMove, setLastMove] = useState<number | null>(null);
   const [flippedDiscs, setFlippedDiscs] = useState<number[]>([]);
   const [passMessage, setPassMessage] = useState<string | null>(null);
   const [isSettling, setIsSettling] = useState(false);
@@ -35,17 +35,6 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
   const discCounts = useMemo(() => countDiscs(board), [board]);
 
   useEffect(() => animateIn('.score-strip, .reversi-board-wrap, .game-actions, .tip'), []);
-
-  // Animate new disc placement
-  useEffect(() => {
-    if (lastMove === null || !motionEnabled()) return;
-    anime({
-      targets: `.reversi-cell[data-index="${lastMove}"] .reversi-disc`,
-      scale: [0.2, 1],
-      duration: 280,
-      easing: 'easeOutBack',
-    });
-  }, [lastMove]);
 
   // Animate flipped discs
   useEffect(() => {
@@ -93,6 +82,7 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
     setRoundWinner(result);
     setIsSettling(false);
     if (result !== 'draw') {
+      playPairSound();
       setMatchScores((current) => ({ ...current, [result]: current[result] + 1 }));
     }
   };
@@ -138,8 +128,8 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
     if (!moveResult) return;
 
     setBoard(moveResult.board);
-    setLastMove(index);
     setFlippedDiscs(moveResult.flippedIndices);
+    playMoveSound(player === 'O');
 
     if (human) {
       triggerHaptic(moveResult.flippedIndices.length > 2 ? [14, 28, 14] : 8);
@@ -192,7 +182,6 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
     setBoard(createReversiBoard());
     setTurn(getRoundStarter(nextRound));
     setRoundWinner(null);
-    setLastMove(null);
     setFlippedDiscs([]);
     setPassMessage(null);
     setIsSettling(false);
@@ -213,7 +202,7 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
       : (passMessage ?? t('playerTurn', { player: playerName(turn) }));
 
   return (
-    <main className="shell game-screen reversi-screen">
+    <main className="shell game-screen reversi-screen theme-reversi">
       <GameHeader
         title={t('reversi')}
         statIcon="grid"
@@ -239,7 +228,6 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
         <div className="reversi-board" role="group" aria-label={t('reversiBoard')}>
           {board.map((cell, index) => {
             const isValid = validMoves.includes(index);
-            const isLast = lastMove === index;
             const ariaLabel = cell
               ? t('reversiCellMarked', {
                   cell: numberFormatter.format(index + 1),
@@ -256,7 +244,7 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
               <button
                 key={index}
                 type="button"
-                className={`reversi-cell ${cell ? (cell === 'X' ? 'x' : 'o') : ''} ${isValid ? 'is-valid' : ''} ${isLast ? 'is-last-move' : ''}`}
+                className={`reversi-cell ${cell ? (cell === 'X' ? 'x' : 'o') : ''} ${isValid ? 'is-valid' : ''}`}
                 data-index={index}
                 disabled={!isValid || Boolean(roundWinner) || isSettling}
                 onClick={() => playCell(index)}
