@@ -6,6 +6,7 @@ import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
 import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import { playMoveSound, playPairSound } from '../../app/sfx';
+import { recordMatchResult } from '../../app/stats';
 import {
   chooseDotsBotEdge,
   countOwnedBoxes,
@@ -62,7 +63,15 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
     const result: Player | 'draw' = xBoxes === oBoxes ? 'draw' : xBoxes > oBoxes ? 'X' : 'O';
     setRoundWinner(result);
     setIsSettling(false);
-    if (result !== 'draw') setMatchScores((current) => ({ ...current, [result]: current[result] + 1 }));
+    const nextScores = {
+      ...matchScores,
+      ...(result !== 'draw' ? { [result]: matchScores[result] + 1 } : {}),
+    };
+    if (result !== 'draw') setMatchScores(nextScores);
+    if (round >= setup.rounds) {
+      const outcome = nextScores.X === nextScores.O ? 'draw' : nextScores.X > nextScores.O ? 'win' : 'loss';
+      recordMatchResult('dots', outcome);
+    }
   };
 
   const playEdge = (edge: DotEdge, player: Player = turn, human = true) => {
@@ -196,7 +205,7 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
         resetDisabled={Boolean(roundWinner) || isSettling}
       />
       <Tip>{t('dotsTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} />}
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('dotsBoxes')} />}
     </main>
   );
 }

@@ -12,6 +12,7 @@ type SettingOption = { key: SettingKey; label: TranslationKey; description: Tran
 const OPTIONS: SettingOption[] = [
   { key: 'animations', label: 'animations', description: 'animationsDescription' },
   { key: 'music', label: 'musicSetting', description: 'musicDescription' },
+  { key: 'sfx', label: 'sfxSetting', description: 'sfxDescription' },
   { key: 'haptics', label: 'haptics', description: 'hapticsDescription' },
   { key: 'highContrast', label: 'highContrast', description: 'highContrastDescription' },
 ];

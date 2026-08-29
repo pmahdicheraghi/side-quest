@@ -162,17 +162,50 @@ export function GameActions({
   );
 }
 
-const MATCH_RESULT_DURATION = 3200;
+const MATCH_RESULT_DURATION = 4200;
 
-export function MatchResultToast({ message }: { message: string }) {
+export function MatchResultToast({ message, gameTitle }: { message: string; gameTitle?: string }) {
   const { t } = useI18n();
   const [visible, setVisible] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     playWinSound();
     const timeout = window.setTimeout(() => setVisible(false), MATCH_RESULT_DURATION);
     return () => window.clearTimeout(timeout);
   }, []);
+
+  const handleShare = async () => {
+    playTapSound();
+    const shareText = t('shareText', {
+      game: gameTitle ?? t('appName'),
+      result: message,
+      url: window.location.origin || window.location.href,
+    });
+
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: t('appName'),
+          text: shareText,
+          url: window.location.href,
+        });
+        return;
+      } catch {
+        // User cancelled or share failed, fall back to clipboard
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 2000);
+      } catch {
+        // Clipboard unavailable
+      }
+    }
+  };
 
   if (!visible) return null;
 
@@ -183,10 +216,20 @@ export function MatchResultToast({ message }: { message: string }) {
         <span className="match-result-toast-spark" aria-hidden="true">
           ✦
         </span>
-        <span>
+        <div className="match-result-toast-content">
           <small>{t('matchComplete')}</small>
           <strong>{message}</strong>
-        </span>
+        </div>
+        <button
+          type="button"
+          className={`match-result-share-btn ${copied ? 'is-copied' : ''}`}
+          onClick={handleShare}
+          aria-label={t(copied ? 'copiedToClipboard' : 'shareResult')}
+          title={t(copied ? 'copiedToClipboard' : 'shareResult')}
+        >
+          <Icon name={copied ? 'check' : 'share'} />
+          <span>{t(copied ? 'copiedToClipboard' : 'shareResult')}</span>
+        </button>
       </div>
     </>
   );

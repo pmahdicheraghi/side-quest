@@ -15,14 +15,48 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  width: min(100% - 40px, 420px);
+  width: min(100% - 40px, 460px);
   margin-inline: auto;
-  padding: 14px 17px;
-  pointer-events: none;
+  padding: 12px 16px;
+  pointer-events: auto;
   border: 1px solid var(--game-border, var(--acid-border));
   border-radius: 14px;
   background: var(--panel);
   animation: match-result-toast-in 240ms ease-out both;
+}
+.match-result-toast-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.match-result-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--game-border, var(--acid-border));
+  border-radius: 999px;
+  background: var(--game-tint, var(--acid-tint));
+  color: var(--game-accent, var(--acid));
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 180ms ease;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.match-result-share-btn:hover {
+  background: var(--game-accent, var(--acid));
+  color: var(--ink-on-acid);
+}
+.match-result-share-btn .icon {
+  width: 14px;
+  height: 14px;
+}
+.match-result-share-btn.is-copied {
+  border-color: var(--acid);
+  background: var(--acid);
+  color: var(--ink-on-acid);
 }
 .match-result-toast-spark {
   flex: 0 0 auto;
@@ -203,4 +237,158 @@ html[dir='rtl'] .setup-close {
 html[dir='rtl'] .setup-dialog h2 {
   margin-right: 0;
   margin-left: 44px;
+}
+
+/* Stats Dialog */
+.stats-dialog {
+  width: min(calc(100% - 32px), 520px);
+}
+.stats-dialog-card {
+  max-height: min(85dvh, 720px);
+}
+.stats-empty-state {
+  padding: 36px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+.stats-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 20px 0;
+}
+@media (max-width: 440px) {
+  .stats-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.stats-summary-card {
+  padding: 12px 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-subtle);
+  text-align: center;
+}
+.stats-summary-val {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.stats-summary-val.stats-highlight {
+  color: var(--acid);
+}
+.stats-summary-label {
+  display: block;
+  margin-top: 4px;
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-mono);
+}
+.stats-games-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.stats-game-row {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-faint);
+  transition: border-color 160ms ease;
+}
+.stats-game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.stats-game-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.stats-game-name .icon {
+  width: 16px;
+  height: 16px;
+  color: var(--game-accent, var(--acid));
+}
+.stats-game-winrate {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface-tint);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.stats-game-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+}
+.stats-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stats-metric small {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+.stats-metric b {
+  font-size: 13px;
+  color: var(--ink);
+}
+.stats-metric b.stats-wins-val {
+  color: var(--acid);
+}
+.stats-metric-reflex b {
+  color: var(--reaction-card-bg, #f4c45c);
+}
+.stats-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+.stats-actions .primary-btn {
+  width: auto;
+  min-width: 140px;
+  margin-inline-start: auto;
+}
+.stats-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 100, 100, 0.25);
+  border-radius: 10px;
+  background: transparent;
+  color: #ff8585;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+.stats-reset-btn:hover {
+  background: rgba(255, 100, 100, 0.12);
+  border-color: rgba(255, 100, 100, 0.5);
+}
+.stats-reset-btn.is-confirming {
+  background: rgba(255, 80, 80, 0.25);
+  border-color: #ff5555;
+  color: #ffb5b5;
+  font-weight: 600;
+}
+.stats-reset-btn .icon {
+  width: 14px;
+  height: 14px;
 }

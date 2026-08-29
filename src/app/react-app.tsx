@@ -11,6 +11,7 @@ import { ConnectFourPage } from '../pages/connect-four/ConnectFourPage';
 import { DotsBoxesPage } from '../pages/dots-boxes/DotsBoxesPage';
 import { ReversiPage } from '../pages/reversi/ReversiPage';
 import { GameSetupDialog } from '../components/GameSetupDialog';
+import { StatsDialog } from '../components/StatsDialog';
 import { translate, useI18n, type Language } from './i18n';
 import { animateIn } from './animation';
 import { Icon } from '../components/react-layout';
@@ -37,6 +38,7 @@ export function ReactApp(): ReactElement {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(isStandaloneDisplayMode);
   const [dismissedUpdate, setDismissedUpdate] = useState<string | null>(null);
+  const [showStats, setShowStats] = useState(false);
   const musicRef = useRef<MusicController | null>(null);
   const pwaUpdate = usePwaUpdate();
 
@@ -145,6 +147,7 @@ export function ReactApp(): ReactElement {
       {view === 'menu' && (
         <MenuPage
           onNavigate={navigate}
+          onOpenStats={() => setShowStats(true)}
           canInstall={Boolean(installPrompt && !isInstalled)}
           onInstall={installApp}
           updateVersion={pwaUpdate.availableVersion}
@@ -170,6 +173,7 @@ export function ReactApp(): ReactElement {
           onStart={startGame}
         />
       )}
+      {showStats && <StatsDialog onClose={() => setShowStats(false)} />}
     </div>
   );
 }
@@ -206,6 +210,7 @@ function gameTitle(view: Exclude<View, 'menu' | 'settings'>, language: Language)
 
 function MenuPage({
   onNavigate,
+  onOpenStats,
   canInstall,
   onInstall,
   updateVersion,
@@ -215,6 +220,7 @@ function MenuPage({
   onDismissUpdate,
 }: {
   onNavigate: (view: View) => void;
+  onOpenStats: () => void;
   canInstall: boolean;
   onInstall: () => void;
   updateVersion: string | null;
@@ -261,6 +267,17 @@ function MenuPage({
               {t(isOnline ? 'online' : 'offline')}
             </span>
           )}
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={() => {
+              playTapSound();
+              onOpenStats();
+            }}
+            aria-label={t('statsTitle')}
+          >
+            <Icon name="trophy" />
+          </button>
           <button type="button" className="icon-btn" onClick={() => onNavigate('settings')} aria-label={t('openSettings')}>
             <Icon name="settings" />
           </button>

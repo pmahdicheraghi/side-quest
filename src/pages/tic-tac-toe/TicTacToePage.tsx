@@ -7,6 +7,7 @@ import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../.
 import './tic-tac-toe.css';
 import { useI18n } from '../../app/i18n';
 import { playMoveSound, playPairSound } from '../../app/sfx';
+import { recordMatchResult } from '../../app/stats';
 import {
   chooseTicBotMove,
   createTicState,
@@ -33,7 +34,12 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
   const finishRound = (result: Exclude<TicResult, null>, finalGame: TicState, human: boolean) => {
     setWinner(result);
     setWinningLine(getTicWinningLine(finalGame.board) ?? []);
-    setScores((current) => ({ ...current, [result]: current[result] + 1 }));
+    const nextScores = { ...scores, [result]: scores[result] + 1 };
+    setScores(nextScores);
+    if (round >= setup.rounds) {
+      const outcome = nextScores.X === nextScores.O ? 'draw' : nextScores.X > nextScores.O ? 'win' : 'loss';
+      recordMatchResult('tic', outcome);
+    }
     if (human) {
       triggerHaptic([18, 35, 18]);
       playPairSound();
@@ -158,7 +164,7 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
         resetDisabled={Boolean(winner)}
       />
       <Tip>{t('ticTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} />}
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('ticTacToe')} />}
     </main>
   );
 }

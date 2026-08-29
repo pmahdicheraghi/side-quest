@@ -6,6 +6,7 @@ import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
 import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import { playMoveSound, playPairSound } from '../../app/sfx';
+import { recordMatchResult } from '../../app/stats';
 import {
   chooseConnectBotColumn,
   CONNECT_COLUMNS,
@@ -39,7 +40,15 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
   const finishRound = (result: Player | 'draw', finalBoard: ConnectCell[], human: boolean) => {
     setWinner(result);
     setWinningLine(getConnectWinningLine(finalBoard) ?? []);
-    if (result !== 'draw') setScores((current) => ({ ...current, [result]: current[result] + 1 }));
+    const nextScores = {
+      ...scores,
+      ...(result !== 'draw' ? { [result]: scores[result] + 1 } : {}),
+    };
+    if (result !== 'draw') setScores(nextScores);
+    if (round >= setup.rounds) {
+      const outcome = nextScores.X === nextScores.O ? 'draw' : nextScores.X > nextScores.O ? 'win' : 'loss';
+      recordMatchResult('connect', outcome);
+    }
     if (human) {
       triggerHaptic([18, 35, 18]);
       playPairSound();
@@ -217,7 +226,7 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
         resetDisabled={Boolean(winner) || isSettling}
       />
       <Tip>{t('connectTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} />}
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('connectFour')} />}
     </main>
   );
 }

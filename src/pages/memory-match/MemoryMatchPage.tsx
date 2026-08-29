@@ -3,6 +3,7 @@ import { animateIn } from '../../app/animation';
 import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { playErrorSound, playPairSound, playTapSound } from '../../app/sfx';
+import { recordMatchResult } from '../../app/stats';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
 import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import {
@@ -98,8 +99,16 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
           if (nextPairs === MEMORY_SYMBOLS.length) {
             const roundWinner: Player | 'draw' =
               nextRoundScores.X === nextRoundScores.O ? 'draw' : nextRoundScores.X > nextRoundScores.O ? 'X' : 'O';
+            const nextMatchScores = {
+              ...matchScores,
+              ...(roundWinner !== 'draw' ? { [roundWinner]: matchScores[roundWinner] + 1 } : {}),
+            };
             if (roundWinner !== 'draw') {
-              setMatchScores((current) => ({ ...current, [roundWinner]: current[roundWinner] + 1 }));
+              setMatchScores(nextMatchScores);
+            }
+            if (round >= setup.rounds) {
+              const outcome = nextMatchScores.X === nextMatchScores.O ? 'draw' : nextMatchScores.X > nextMatchScores.O ? 'win' : 'loss';
+              recordMatchResult('memory', outcome);
             }
           }
         } else {
@@ -212,7 +221,7 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
         resetDisabled={finished}
       />
       <Tip>{t('memoryTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} />}
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('memoryMatch')} />}
     </main>
   );
 }

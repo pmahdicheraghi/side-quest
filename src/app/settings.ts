@@ -1,10 +1,11 @@
-export type SettingKey = 'animations' | 'music' | 'haptics' | 'highContrast';
+export type SettingKey = 'animations' | 'music' | 'sfx' | 'haptics' | 'highContrast';
 
 export type Settings = Record<SettingKey, boolean>;
 
 export const defaultSettings: Settings = {
   animations: true,
   music: true,
+  sfx: true,
   haptics: true,
   highContrast: false,
 };

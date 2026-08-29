@@ -6,6 +6,7 @@ import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
 import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import { playMoveSound, playPairSound } from '../../app/sfx';
+import { recordMatchResult } from '../../app/stats';
 import { chooseReversiBotMove, countDiscs, createReversiBoard, getValidMoves, makeMove, type ReversiCell } from './reversi-logic';
 import './reversi.css';
 
@@ -81,9 +82,17 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
     const result: Player | 'draw' = counts.X === counts.O ? 'draw' : counts.X > counts.O ? 'X' : 'O';
     setRoundWinner(result);
     setIsSettling(false);
+    const nextScores = {
+      ...matchScores,
+      ...(result !== 'draw' ? { [result]: matchScores[result] + 1 } : {}),
+    };
     if (result !== 'draw') {
       playPairSound();
-      setMatchScores((current) => ({ ...current, [result]: current[result] + 1 }));
+      setMatchScores(nextScores);
+    }
+    if (round >= setup.rounds) {
+      const outcome = nextScores.X === nextScores.O ? 'draw' : nextScores.X > nextScores.O ? 'win' : 'loss';
+      recordMatchResult('reversi', outcome);
     }
   };
 
@@ -264,7 +273,7 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
         resetDisabled={Boolean(roundWinner) || isSettling}
       />
       <Tip>{t('reversiTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} />}
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('reversi')} />}
     </main>
   );
 }

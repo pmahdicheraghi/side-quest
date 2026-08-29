@@ -7,6 +7,7 @@ import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../.
 import './reaction-duel.css';
 import { useI18n } from '../../app/i18n';
 import { playErrorSound, playMoveSound, playPairSound } from '../../app/sfx';
+import { recordMatchResult } from '../../app/stats';
 import {
   getBotReactionDelay,
   getReactionMatchWinner,
@@ -27,6 +28,7 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
   const goAt = useRef(0);
   const timer = useRef<number | null>(null);
   const botTimer = useRef<number | null>(null);
+  const bestReactionRef = useRef<number | undefined>(undefined);
 
   useEffect(() => animateIn('.score-strip, .reaction-arena, .reaction-buttons, .game-actions, .tip'), []);
   useEffect(() => () => stopTimers(), []);
@@ -59,6 +61,7 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
   const startRound = () => {
     if (phase === 'result' && round >= setup.rounds) return;
     stopTimers();
+    if (phase === 'idle') bestReactionRef.current = undefined;
     if (phase === 'result') setRound((current) => current + 1);
     setPhase('waiting');
     setReactions({});
@@ -84,19 +87,34 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
       setWinner(attempt.winner);
       setPhase('result');
       stopTimers();
-      setScores((current) => ({ ...current, [attempt.winner]: current[attempt.winner] + 1 }));
+      const nextScores = { ...scores, [attempt.winner]: scores[attempt.winner] + 1 };
+      setScores(nextScores);
+      if (round >= setup.rounds) {
+        const matchWinner = getReactionMatchWinner(nextScores);
+        const outcome = matchWinner === 'draw' ? 'draw' : matchWinner === 'X' ? 'win' : 'loss';
+        recordMatchResult('reaction', outcome, { reactionMs: bestReactionRef.current });
+      }
       return;
     }
     if (attempt.kind !== 'reaction') return;
+    if (player === 'X') {
+      bestReactionRef.current = Math.min(bestReactionRef.current ?? Infinity, attempt.reaction);
+    }
     if (!(mode === 'bot' && player === 'O')) {
       playPairSound();
       triggerHaptic([18, 35, 18]);
     }
     setReactions((current) => ({ ...current, [player]: attempt.reaction }));
     setWinner(attempt.winner);
-    setScores((current) => ({ ...current, [attempt.winner]: current[attempt.winner] + 1 }));
+    const nextScores = { ...scores, [attempt.winner]: scores[attempt.winner] + 1 };
+    setScores(nextScores);
     setPhase('result');
     stopTimers();
+    if (round >= setup.rounds) {
+      const matchWinner = getReactionMatchWinner(nextScores);
+      const outcome = matchWinner === 'draw' ? 'draw' : matchWinner === 'X' ? 'win' : 'loss';
+      recordMatchResult('reaction', outcome, { reactionMs: bestReactionRef.current });
+    }
   };
 
   const matchComplete = phase === 'result' && round >= setup.rounds;
@@ -217,7 +235,7 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
         resetDisabled={running || phase === 'result'}
       />
       <Tip>{t('reactionTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} />}
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('reactionDuel')} />}
     </main>
   );
 }

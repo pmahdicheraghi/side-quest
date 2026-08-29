@@ -22,7 +22,7 @@ export function unlockAudio(): void {
 }
 
 function canPlay(): boolean {
-  return loadSettings().music && typeof window !== 'undefined';
+  return loadSettings().sfx && typeof window !== 'undefined';
 }
 
 function tone(freq: number, type: OscillatorType, duration: number, gainVal = 0.12, startTimeOffset = 0): void {
