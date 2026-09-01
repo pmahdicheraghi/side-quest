@@ -3,7 +3,7 @@ import { applySettings, loadSettings, saveSettings, type SettingKey, type Settin
 import type { GameSetup, View } from './types';
 import { MusicController } from './music';
 import { unlockAudio, playTapSound } from './sfx';
-import { initEitaaSdk, setEitaaBackButton } from './eitaa';
+import { addEitaaToHomeScreen, checkEitaaHomeScreen, initEitaaSdk, setEitaaBackButton } from './eitaa';
 import { SettingsPage } from '../pages/settings/SettingsPage';
 import { TicTacToePage } from '../pages/tic-tac-toe/TicTacToePage';
 import { MemoryMatchPage } from '../pages/memory-match/MemoryMatchPage';
@@ -39,6 +39,7 @@ export function ReactApp(): ReactElement {
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(isStandaloneDisplayMode);
+  const [eitaaCanAddToHomeScreen, setEitaaCanAddToHomeScreen] = useState(false);
   const [dismissedUpdate, setDismissedUpdate] = useState<string | null>(null);
   const [showStats, setShowStats] = useState(false);
   const musicRef = useRef<MusicController | null>(null);
@@ -48,6 +49,7 @@ export function ReactApp(): ReactElement {
 
   useEffect(() => {
     initEitaaSdk();
+    return checkEitaaHomeScreen(setEitaaCanAddToHomeScreen);
   }, []);
 
   useEffect(() => {
@@ -177,6 +179,9 @@ export function ReactApp(): ReactElement {
   };
 
   const installApp = async () => {
+    if (addEitaaToHomeScreen()) {
+      return;
+    }
     if (!installPrompt) return;
     await installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
@@ -203,7 +208,7 @@ export function ReactApp(): ReactElement {
             window.history.pushState(historyStateFor('stats'), '');
             setShowStats(true);
           }}
-          canInstall={Boolean(installPrompt && !isInstalled)}
+          canInstall={Boolean((installPrompt && !isInstalled) || eitaaCanAddToHomeScreen)}
           onInstall={installApp}
           updateVersion={pwaUpdate.availableVersion}
           isUpdating={pwaUpdate.status === 'applying'}
