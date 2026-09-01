@@ -51,7 +51,6 @@ export function initEitaaSdk(): void {
     webApp.disableVerticalSwipes();
     webApp.setHeaderColor('#121a18');
     webApp.setBackgroundColor('#121a18');
-    webApp.requestFullscreen();
   } catch {
     // Graceful fallback if running outside Eitaa client
   }
