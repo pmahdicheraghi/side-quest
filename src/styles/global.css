@@ -1,4 +1,12 @@
 @font-face {
+  font-family: 'Pinar';
+  src: url('/fonts/Pinar.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Vazir Local';
   src: url('/fonts/Vazirmatn.ttf') format('truetype');
   font-style: normal;
@@ -81,8 +89,8 @@
   background: var(--bg);
 }
 :root[lang='fa'] {
-  font-family: 'Vazir Local', Tahoma, 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'Vazir Local', Tahoma, 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Pinar', 'Vazir Local', Tahoma, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Pinar', 'Vazir Local', Tahoma, 'Segoe UI', system-ui, sans-serif;
 }
 * {
   box-sizing: border-box;

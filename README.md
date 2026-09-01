@@ -1,4 +1,4 @@
-# Side Quest — Mini Games
+# Arcado (آرکیدو) — Mini Games
 
 A mobile-first pocket arcade built with React, Vite, TypeScript, inline SVG artwork, and Anime.js motion. React owns the app shell, settings, and every game screen. It can be installed as a progressive web app and reopens offline after its first production visit.
 

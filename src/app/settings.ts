@@ -1,3 +1,5 @@
+import { triggerEitaaHaptic } from './eitaa';
+
 export type SettingKey = 'animations' | 'music' | 'sfx' | 'haptics' | 'highContrast';
 
 export type Settings = Record<SettingKey, boolean>;
@@ -35,7 +37,9 @@ export function applySettings(settings: Settings): void {
 }
 
 export function triggerHaptic(pattern: number | number[] = 8): void {
-  if (loadSettings().haptics && typeof navigator.vibrate === 'function') navigator.vibrate(pattern);
+  if (!loadSettings().haptics) return;
+  triggerEitaaHaptic(Array.isArray(pattern) ? 'medium' : 'light');
+  if (typeof navigator.vibrate === 'function') navigator.vibrate(pattern);
 }
 
 function validSettings(value: Partial<Settings>): Partial<Settings> {

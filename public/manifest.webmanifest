@@ -1,7 +1,7 @@
 {
-  "name": "Side Quest — Mini Games",
-  "short_name": "Side Quest",
-  "description": "Pocket-sized games for quick solo and two-player rounds.",
+  "name": "آرکیدو — بازی‌های جیبی",
+  "short_name": "آرکیدو",
+  "description": "مجموعه مینی‌گیم‌های دونفره و سرعتی جیبی.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

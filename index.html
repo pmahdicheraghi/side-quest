@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#121a18" />
-    <meta name="description" content="Pocket-sized games for two." />
+    <meta name="description" content="آرکیدو — مینی‌گیم‌های دونفره، سریع و سرگرم‌کننده جیبی." />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="./manifest.webmanifest" />
@@ -15,7 +15,13 @@
       href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <title>Side Quest — Mini Games</title>
+    <title>آرکیدو — بازی‌های جیبی</title>
+    <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
+    <script>
+      window.Eitaa.WebApp.ready();
+      window.Eitaa.WebApp.expand();
+      window.Eitaa.WebApp.disableVerticalSwipes();
+    </script>
   </head>
   <body>
     <div id="app"></div>

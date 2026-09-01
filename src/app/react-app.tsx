@@ -3,6 +3,7 @@ import { applySettings, loadSettings, saveSettings, type SettingKey, type Settin
 import type { GameSetup, View } from './types';
 import { MusicController } from './music';
 import { unlockAudio, playTapSound } from './sfx';
+import { initEitaaSdk, setEitaaBackButton } from './eitaa';
 import { SettingsPage } from '../pages/settings/SettingsPage';
 import { TicTacToePage } from '../pages/tic-tac-toe/TicTacToePage';
 import { MemoryMatchPage } from '../pages/memory-match/MemoryMatchPage';
@@ -18,6 +19,7 @@ import { Icon } from '../components/react-layout';
 import { usePwaUpdate } from './usePwaUpdate';
 
 type InstallOutcome = 'accepted' | 'dismissed';
+type HistoryView = View | 'setup' | 'stats';
 const HISTORY_VIEW_KEY = 'sideQuestView';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -45,6 +47,10 @@ export function ReactApp(): ReactElement {
   if (!musicRef.current) musicRef.current = new MusicController(settings.music);
 
   useEffect(() => {
+    initEitaaSdk();
+  }, []);
+
+  useEffect(() => {
     applySettings(settings);
     musicRef.current?.setEnabled(settings.music);
   }, [settings]);
@@ -70,13 +76,65 @@ export function ReactApp(): ReactElement {
   useEffect(() => {
     window.history.replaceState(historyStateFor('menu'), '');
     const handlePopState = (event: PopStateEvent) => {
-      setPendingGame(null);
-      setView(viewFromHistory(event.state) ?? 'menu');
+      const historyView = viewFromHistory(event.state);
+      if (historyView === 'stats') {
+        setShowStats(true);
+        setPendingGame(null);
+        setView('menu');
+      } else if (historyView === 'setup') {
+        setShowStats(false);
+      } else if (historyView === 'menu') {
+        setShowStats(false);
+        setPendingGame(null);
+        setView('menu');
+      } else if (historyView) {
+        setShowStats(false);
+        setPendingGame(null);
+        setView(historyView);
+      } else {
+        setShowStats(false);
+        setPendingGame(null);
+        setView('menu');
+      }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  const returnToMenu = () => {
+    setPendingGame(null);
+    setShowStats(false);
+    if (viewFromHistory(window.history.state) !== 'menu') {
+      window.history.back();
+      return;
+    }
+    setView('menu');
+  };
+
+  useEffect(() => {
+    const isSubPage = view !== 'menu';
+    const isModalOpen = Boolean(pendingGame || showStats);
+    const shouldShowBack = isSubPage || isModalOpen;
+
+    const handleBack = () => {
+      if (showStats) {
+        setShowStats(false);
+        if (viewFromHistory(window.history.state) === 'stats') {
+          window.history.back();
+        }
+      } else if (pendingGame) {
+        setPendingGame(null);
+        if (viewFromHistory(window.history.state) === 'setup') {
+          window.history.back();
+        }
+      } else if (view !== 'menu') {
+        returnToMenu();
+      }
+    };
+
+    return setEitaaBackButton(shouldShowBack, handleBack);
+  }, [view, pendingGame, showStats]);
 
   const updateSetting = (key: SettingKey) => {
     setSettings((current) => {
@@ -85,6 +143,7 @@ export function ReactApp(): ReactElement {
       return next;
     });
   };
+
   const navigate = (nextView: View) => {
     musicRef.current?.handleGesture();
     unlockAudio();
@@ -96,6 +155,7 @@ export function ReactApp(): ReactElement {
       nextView === 'dots' ||
       nextView === 'reversi'
     ) {
+      window.history.pushState(historyStateFor('setup'), '');
       setPendingGame(nextView);
       return;
     }
@@ -107,20 +167,12 @@ export function ReactApp(): ReactElement {
     setView(nextView);
   };
 
-  const returnToMenu = () => {
-    setPendingGame(null);
-    if (viewFromHistory(window.history.state) !== 'menu') {
-      window.history.back();
-      return;
-    }
-    setView('menu');
-  };
-
   const startGame = (setup: GameSetup) => {
     if (!pendingGame) return;
+    const chosenGame = pendingGame;
     setGameSetup(setup);
-    window.history.pushState(historyStateFor(pendingGame), '');
-    setView(pendingGame);
+    window.history.replaceState(historyStateFor(chosenGame), '');
+    setView(chosenGame);
     setPendingGame(null);
   };
 
@@ -147,7 +199,10 @@ export function ReactApp(): ReactElement {
       {view === 'menu' && (
         <MenuPage
           onNavigate={navigate}
-          onOpenStats={() => setShowStats(true)}
+          onOpenStats={() => {
+            window.history.pushState(historyStateFor('stats'), '');
+            setShowStats(true);
+          }}
           canInstall={Boolean(installPrompt && !isInstalled)}
           onInstall={installApp}
           updateVersion={pwaUpdate.availableVersion}
@@ -169,22 +224,36 @@ export function ReactApp(): ReactElement {
           gameTitle={gameTitle(pendingGame, language)}
           initialSetup={gameSetup}
           themeClass={`theme-${pendingGame}`}
-          onCancel={() => setPendingGame(null)}
+          onCancel={() => {
+            setPendingGame(null);
+            if (viewFromHistory(window.history.state) === 'setup') {
+              window.history.back();
+            }
+          }}
           onStart={startGame}
         />
       )}
-      {showStats && <StatsDialog onClose={() => setShowStats(false)} />}
+      {showStats && (
+        <StatsDialog
+          onClose={() => {
+            setShowStats(false);
+            if (viewFromHistory(window.history.state) === 'stats') {
+              window.history.back();
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function historyStateFor(view: View): Record<string, unknown> {
+function historyStateFor(view: HistoryView): Record<string, unknown> {
   const current = window.history.state;
   const base = current && typeof current === 'object' ? current : {};
   return { ...base, [HISTORY_VIEW_KEY]: view };
 }
 
-function viewFromHistory(state: unknown): View | null {
+function viewFromHistory(state: unknown): HistoryView | null {
   if (!state || typeof state !== 'object') return null;
   const value = (state as Record<string, unknown>)[HISTORY_VIEW_KEY];
   return value === 'menu' ||
@@ -194,8 +263,10 @@ function viewFromHistory(state: unknown): View | null {
     value === 'reaction' ||
     value === 'connect' ||
     value === 'dots' ||
-    value === 'reversi'
-    ? value
+    value === 'reversi' ||
+    value === 'setup' ||
+    value === 'stats'
+    ? (value as HistoryView)
     : null;
 }
 
