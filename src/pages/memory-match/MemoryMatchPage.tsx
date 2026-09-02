@@ -5,7 +5,7 @@ import { triggerHaptic } from '../../app/settings';
 import { playErrorSound, playPairSound, playTapSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import {
   chooseMemoryBotCard,
   createMemoryDeck,
@@ -34,7 +34,7 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
   const pairTimeout = useRef<number | null>(null);
   const botMemory = useRef<BotMemory>(new Map());
 
-  useEffect(() => animateIn('.score-strip, .memory-grid, .game-actions, .tip'), []);
+  useEffect(() => animateIn('.score-strip, .memory-grid, .tip'), []);
 
   useEffect(
     () => () => {
@@ -214,14 +214,8 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
           </button>
         ))}
       </section>
-      <GameActions
-        resetLabel={t(matchComplete ? 'matchComplete' : finished ? 'nextRoundStarting' : 'restartMatch')}
-        onReset={() => resetBoard(finished ? { keepScore: true, advanceRound: true } : undefined)}
-        onExit={onExit}
-        resetDisabled={finished}
-      />
       <Tip>{t('memoryTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} gameTitle={t('memoryMatch')} />}
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('memoryMatch')} onExit={onExit} />}
     </main>
   );
 }

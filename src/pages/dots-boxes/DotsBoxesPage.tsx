@@ -4,7 +4,7 @@ import { animateIn, motionEnabled } from '../../app/animation';
 import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import { playMoveSound, playPairSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
 import {
@@ -38,7 +38,7 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
   const finishTimer = useRef<number | null>(null);
   const numberFormatter = new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en');
 
-  useEffect(() => animateIn('.score-strip, .dots-board-wrap, .game-actions, .tip'), []);
+  useEffect(() => animateIn('.score-strip, .dots-board-wrap, .tip'), []);
 
   useEffect(() => {
     if (!newBoxes.length || !motionEnabled()) return;
@@ -198,14 +198,8 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
           })}
         </div>
       </section>
-      <GameActions
-        resetLabel={t(matchComplete ? 'matchComplete' : roundWinner ? 'nextRoundStarting' : 'resetBoard')}
-        onReset={() => resetRound(Boolean(roundWinner))}
-        onExit={onExit}
-        resetDisabled={Boolean(roundWinner) || isSettling}
-      />
       <Tip>{t('dotsTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} gameTitle={t('dotsBoxes')} />}
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('dotsBoxes')} onExit={onExit} />}
     </main>
   );
 }

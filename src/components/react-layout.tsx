@@ -123,89 +123,32 @@ export function ScoreStrip({
   );
 }
 
-export function GameActions({
-  resetLabel,
-  onReset,
+
+const MATCH_RESULT_DURATION = 3500;
+
+export function MatchResultToast({
+  message,
+  gameTitle: _gameTitle,
   onExit,
-  resetDisabled = false,
 }: {
-  resetLabel: string;
-  onReset: () => void;
-  onExit: () => void;
-  resetDisabled?: boolean;
+  message: string;
+  gameTitle?: string;
+  onExit?: () => void;
 }) {
   const { t } = useI18n();
-  return (
-    <div className="game-actions">
-      <button
-        type="button"
-        className="primary-btn"
-        onClick={() => {
-          playTapSound();
-          onReset();
-        }}
-        disabled={resetDisabled}
-      >
-        {resetLabel} <Icon name="arrow" />
-      </button>
-      <button
-        type="button"
-        className="text-btn"
-        onClick={() => {
-          playTapSound();
-          onExit();
-        }}
-      >
-        {t('quitToMenu')}
-      </button>
-    </div>
-  );
-}
-
-const MATCH_RESULT_DURATION = 4200;
-
-export function MatchResultToast({ message, gameTitle }: { message: string; gameTitle?: string }) {
-  const { t } = useI18n();
   const [visible, setVisible] = useState(true);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     playWinSound();
-    const timeout = window.setTimeout(() => setVisible(false), MATCH_RESULT_DURATION);
+    const timeout = window.setTimeout(() => {
+      if (onExit) {
+        onExit();
+      } else {
+        setVisible(false);
+      }
+    }, MATCH_RESULT_DURATION);
     return () => window.clearTimeout(timeout);
-  }, []);
-
-  const handleShare = async () => {
-    playTapSound();
-    const shareText = t('shareText', {
-      game: gameTitle ?? t('appName'),
-      result: message,
-      url: window.location.origin || window.location.href,
-    });
-
-    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-      try {
-        await navigator.share({
-          title: t('appName'),
-          text: shareText,
-          url: window.location.href,
-        });
-        return;
-      } catch {
-        // User cancelled or share failed, fall back to clipboard
-      }
-    }
-
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(shareText);
-        setCopied(true);
-        window.setTimeout(() => setCopied(false), 2000);
-      } catch {
-        // Clipboard unavailable
-      }
-    }
-  };
+  }, [onExit]);
 
   if (!visible) return null;
 
@@ -222,13 +165,19 @@ export function MatchResultToast({ message, gameTitle }: { message: string; game
         </div>
         <button
           type="button"
-          className={`match-result-share-btn ${copied ? 'is-copied' : ''}`}
-          onClick={handleShare}
-          aria-label={t(copied ? 'copiedToClipboard' : 'shareResult')}
-          title={t(copied ? 'copiedToClipboard' : 'shareResult')}
+          className="match-result-timer-btn"
+          onClick={() => {
+            playTapSound();
+            onExit?.();
+          }}
+          aria-label={t('backToMenu')}
+          title={t('backToMenu')}
         >
-          <Icon name={copied ? 'check' : 'share'} />
-          <span>{t(copied ? 'copiedToClipboard' : 'shareResult')}</span>
+          <svg className="timer-ring" viewBox="0 0 36 36" aria-hidden="true">
+            <circle className="timer-ring-track" cx="18" cy="18" r="15" />
+            <circle className="timer-ring-progress" cx="18" cy="18" r="15" />
+          </svg>
+          <Icon name="home" />
         </button>
       </div>
     </>

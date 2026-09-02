@@ -3,7 +3,7 @@ import anime from 'animejs';
 import { animateIn, motionEnabled } from '../../app/animation';
 import { triggerHaptic } from '../../app/settings';
 import type { GameSetup, Player } from '../../app/types';
-import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import './reaction-duel.css';
 import { useI18n } from '../../app/i18n';
 import { playErrorSound, playMoveSound, playPairSound } from '../../app/sfx';
@@ -30,7 +30,11 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
   const botTimer = useRef<number | null>(null);
   const bestReactionRef = useRef<number | undefined>(undefined);
 
-  useEffect(() => animateIn('.score-strip, .reaction-arena, .reaction-buttons, .game-actions, .tip'), []);
+  useEffect(() => animateIn('.score-strip, .reaction-arena, .reaction-buttons, .tip'), []);
+  useEffect(() => {
+    const timeout = window.setTimeout(startRound, 600);
+    return () => window.clearTimeout(timeout);
+  }, []);
   useEffect(() => () => stopTimers(), []);
   useEffect(() => {
     if (phase !== 'waiting') return;
@@ -218,24 +222,8 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
           <small>{label('O')}</small>
         </button>
       </section>
-      <GameActions
-        resetLabel={
-          matchComplete
-            ? t('matchComplete')
-            : phase === 'idle'
-              ? t('startRound')
-              : phase === 'result'
-                ? t('nextRoundStarting')
-                : t('roundRunning')
-        }
-        onReset={() => {
-          if (phase === 'idle' || phase === 'result') startRound();
-        }}
-        onExit={onExit}
-        resetDisabled={running || phase === 'result'}
-      />
       <Tip>{t('reactionTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} gameTitle={t('reactionDuel')} />}
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('reactionDuel')} onExit={onExit} />}
     </main>
   );
 }

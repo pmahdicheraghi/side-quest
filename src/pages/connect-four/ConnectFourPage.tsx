@@ -4,7 +4,7 @@ import { animateIn, motionEnabled } from '../../app/animation';
 import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import { playMoveSound, playPairSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
 import {
@@ -66,7 +66,7 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
     }, delay);
   };
 
-  useEffect(() => animateIn('.score-strip, .connect-board-wrap, .game-actions, .tip'), []);
+  useEffect(() => animateIn('.score-strip, .connect-board-wrap, .tip'), []);
 
   useEffect(() => {
     if (lastMove === null || !motionEnabled()) return;
@@ -219,14 +219,8 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
           })}
         </div>
       </section>
-      <GameActions
-        resetLabel={t(matchComplete ? 'matchComplete' : winner ? 'nextRoundStarting' : 'resetBoard')}
-        onReset={() => resetRound(Boolean(winner))}
-        onExit={onExit}
-        resetDisabled={Boolean(winner) || isSettling}
-      />
       <Tip>{t('connectTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} gameTitle={t('connectFour')} />}
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('connectFour')} onExit={onExit} />}
     </main>
   );
 }

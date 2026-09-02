@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react';
 import anime from 'animejs';
+import { useEffect, useState } from 'react';
 import { animateIn, motionEnabled } from '../../app/animation';
-import { triggerHaptic } from '../../app/settings';
-import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
-import './tic-tac-toe.css';
 import { useI18n } from '../../app/i18n';
+import { triggerHaptic } from '../../app/settings';
 import { playMoveSound, playPairSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
+import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
+import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import {
   chooseTicBotMove,
   createTicState,
@@ -18,6 +17,7 @@ import {
   type TicResult,
   type TicState,
 } from './tic-tac-toe-logic';
+import './tic-tac-toe.css';
 
 export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () => void }) {
   const { language, t } = useI18n();
@@ -46,7 +46,7 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
     }
   };
 
-  useEffect(() => animateIn('.score-strip, .tic-board-wrap, .game-actions, .tip'), []);
+  useEffect(() => animateIn('.score-strip, .tic-board-wrap, .tip'), []);
   useEffect(() => {
     if (!winningLine.length || !motionEnabled()) return;
     anime({ targets: '.tic-cell.is-winner', scale: [1, 0.96, 1], delay: anime.stagger(90), duration: 420, easing: 'easeOutCubic' });
@@ -157,14 +157,8 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
           ))}
         </div>
       </section>
-      <GameActions
-        resetLabel={t(matchComplete ? 'matchComplete' : winner ? 'nextRoundStarting' : 'resetBoard')}
-        onReset={() => resetRound(Boolean(winner))}
-        onExit={onExit}
-        resetDisabled={Boolean(winner)}
-      />
       <Tip>{t('ticTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} gameTitle={t('ticTacToe')} />}
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('ticTacToe')} onExit={onExit} />}
     </main>
   );
 }

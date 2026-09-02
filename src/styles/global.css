@@ -7,7 +7,7 @@
 }
 
 @font-face {
-  font-family: 'Vazir Local';
+  font-family: 'Vazirmatn';
   src: url('/fonts/Vazirmatn.ttf') format('truetype');
   font-style: normal;
   font-weight: 100 900;
@@ -89,8 +89,8 @@
   background: var(--bg);
 }
 :root[lang='fa'] {
-  font-family: 'Pinar', 'Vazir Local', Tahoma, 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'Pinar', 'Vazir Local', Tahoma, 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Pinar', 'Vazirmatn', Tahoma, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Pinar', 'Vazirmatn', Tahoma, 'Segoe UI', system-ui, sans-serif;
 }
 * {
   box-sizing: border-box;
@@ -217,7 +217,6 @@ p {
   height: 20px;
 }
 .topbar,
-.game-actions,
 .score-strip {
   display: flex;
   align-items: center;
@@ -383,6 +382,7 @@ p {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  gap: 4px;
 }
 .score-values {
   display: flex;
@@ -431,7 +431,7 @@ p {
 }
 .score-strip strong {
   color: var(--ink);
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 500;
   letter-spacing: -0.05em;
   line-height: 1;
@@ -488,11 +488,6 @@ p {
     flex-basis: 20px;
     font-size: 7px;
   }
-}
-.game-actions {
-  flex-direction: column;
-  gap: 13px;
-  margin-top: 25px;
 }
 .primary-btn {
   min-height: 48px;
@@ -725,6 +720,10 @@ h1 em {
   z-index: 1;
 }
 .game-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
   text-align: left;
   width: 100%;
   min-height: 275px;
@@ -763,6 +762,7 @@ h1 em {
   position: absolute;
   inset: 0;
   opacity: 0.27;
+  pointer-events: none;
 }
 .tic-card {
   background: var(--tic-card-bg);
@@ -965,11 +965,9 @@ h1 em {
   background: var(--orange);
 }
 .card-copy {
-  position: absolute;
-  bottom: 17px;
-  left: 19px;
-  right: 19px;
+  position: relative;
   z-index: 2;
+  margin-top: auto;
 }
 .card-copy h2 {
   font-size: 26px;
@@ -1042,24 +1040,27 @@ h1 em {
 
 .celebration-spark {
   position: absolute;
-  color: var(--game-accent, var(--acid));
-  font-size: 20px;
-  animation: celebration-burst 1.6s cubic-bezier(0.15, 0.85, 0.35, 1.1) both;
+  font-size: 28px;
+  line-height: 1;
+  animation: celebration-burst 2.4s cubic-bezier(0.12, 0.8, 0.32, 1) both;
   animation-delay: var(--delay);
 }
 
 @keyframes celebration-burst {
   0% {
     opacity: 0;
-    transform: translate(0, 0) scale(0.2);
+    transform: translate(0, 0) scale(0.2) rotate(0deg);
   }
-  20% {
+  35% {
     opacity: 1;
-    transform: translate(calc(var(--target-x) * 0.4), calc(var(--target-y) * 0.4)) scale(var(--scale));
+    transform: translate(calc(var(--target-x) * 0.5), calc(var(--target-y) * 0.6)) scale(var(--scale)) rotate(calc(var(--rot, 0deg) * 0.3));
+  }
+  75% {
+    opacity: 0.95;
   }
   100% {
     opacity: 0;
-    transform: translate(var(--target-x), calc(var(--target-y) + 70px)) scale(calc(var(--scale) * 0.4));
+    transform: translate(var(--target-x), calc(var(--target-y) + 100px)) scale(calc(var(--scale) * 0.4)) rotate(var(--rot, 0deg));
   }
 }
 

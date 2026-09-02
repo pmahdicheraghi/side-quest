@@ -4,7 +4,7 @@ import { animateIn, motionEnabled } from '../../app/animation';
 import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameActions, GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import { playMoveSound, playPairSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
 import { chooseReversiBotMove, countDiscs, createReversiBoard, getValidMoves, makeMove, type ReversiCell } from './reversi-logic';
@@ -35,7 +35,7 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
 
   const discCounts = useMemo(() => countDiscs(board), [board]);
 
-  useEffect(() => animateIn('.score-strip, .reversi-board-wrap, .game-actions, .tip'), []);
+  useEffect(() => animateIn('.score-strip, .reversi-board-wrap, .tip'), []);
 
   // Animate flipped discs
   useEffect(() => {
@@ -266,14 +266,8 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
           })}
         </div>
       </section>
-      <GameActions
-        resetLabel={t(matchComplete ? 'matchComplete' : roundWinner ? 'nextRoundStarting' : 'resetBoard')}
-        onReset={() => resetRound(Boolean(roundWinner))}
-        onExit={onExit}
-        resetDisabled={Boolean(roundWinner) || isSettling}
-      />
       <Tip>{t('reversiTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} gameTitle={t('reversi')} />}
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('reversi')} onExit={onExit} />}
     </main>
   );
 }
