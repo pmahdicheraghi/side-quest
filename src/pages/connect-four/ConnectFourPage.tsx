@@ -20,10 +20,11 @@ import {
   type ConnectCell,
 } from './connect-four-logic';
 import './connect-four.css';
+import type { PlayerNames } from '../../app/player-names';
 
 const DROP_ANIMATION_DURATION_MS = 520;
 
-export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: () => void }) {
+export function ConnectFourPage({ setup, playerNames, onExit }: { setup: GameSetup; playerNames: PlayerNames; onExit: () => void }) {
   const { language, t } = useI18n();
   const mode = setup.mode;
   const [board, setBoard] = useState<ConnectCell[]>(createConnectBoard);
@@ -47,7 +48,7 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
     if (result !== 'draw') setScores(nextScores);
     if (round >= setup.rounds) {
       const outcome = nextScores.X === nextScores.O ? 'draw' : nextScores.X > nextScores.O ? 'win' : 'loss';
-      recordMatchResult('connect', outcome);
+      recordMatchResult('connect', outcome, { difficulty: mode === 'bot' ? setup.difficulty : undefined });
     }
     if (human) {
       triggerHaptic([18, 35, 18]);
@@ -146,7 +147,7 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
   };
 
   const matchComplete = Boolean(winner) && round >= setup.rounds;
-  const playerName = (player: Player) => t(player === 'X' ? 'player1' : mode === 'bot' ? 'bot' : 'player2');
+  const playerName = (player: Player) => playerNames[player];
   const status = isSettling
     ? t('connectDiscSettling')
     : winner
@@ -170,9 +171,9 @@ export function ConnectFourPage({ setup, onExit }: { setup: GameSetup; onExit: (
         onExit={onExit}
       />
       <ScoreStrip
-        leftLabel={t('player1')}
+        leftLabel={playerNames.X}
         leftMark="●"
-        rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
+        rightLabel={playerNames.O}
         rightMark="●"
         scores={scores}
         inGameScores={{

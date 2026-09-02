@@ -12,14 +12,15 @@ import { ConnectFourPage } from '../pages/connect-four/ConnectFourPage';
 import { DotsBoxesPage } from '../pages/dots-boxes/DotsBoxesPage';
 import { ReversiPage } from '../pages/reversi/ReversiPage';
 import { GameSetupDialog } from '../components/GameSetupDialog';
-import { StatsDialog } from '../components/StatsDialog';
+import { StatsPage } from '../components/StatsDialog';
 import { translate, useI18n, type Language } from './i18n';
 import { animateIn } from './animation';
 import { Icon } from '../components/react-layout';
 import { usePwaUpdate } from './usePwaUpdate';
+import { limitPlayerName, loadPlayerNames, normalizePlayerName, savePlayerNames, type PlayerNames } from './player-names';
 
 type InstallOutcome = 'accepted' | 'dismissed';
-type HistoryView = View | 'setup' | 'stats';
+type HistoryView = View | 'setup';
 const HISTORY_VIEW_KEY = 'sideQuestView';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -34,14 +35,14 @@ function isStandaloneDisplayMode(): boolean {
 export function ReactApp(): ReactElement {
   const { language } = useI18n();
   const [view, setView] = useState<View>('menu');
-  const [pendingGame, setPendingGame] = useState<Exclude<View, 'menu' | 'settings'> | null>(null);
+  const [pendingGame, setPendingGame] = useState<Exclude<View, 'menu' | 'settings' | 'stats'> | null>(null);
   const [gameSetup, setGameSetup] = useState<GameSetup>({ mode: 'bot', difficulty: 'normal', rounds: 3 });
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
+  const [playerNames, setPlayerNames] = useState<PlayerNames>(() => loadPlayerNames());
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(isStandaloneDisplayMode);
   const [eitaaCanAddToHomeScreen, setEitaaCanAddToHomeScreen] = useState(false);
   const [dismissedUpdate, setDismissedUpdate] = useState<string | null>(null);
-  const [showStats, setShowStats] = useState(false);
   const musicRef = useRef<MusicController | null>(null);
   const pwaUpdate = usePwaUpdate();
 
@@ -79,22 +80,15 @@ export function ReactApp(): ReactElement {
     window.history.replaceState(historyStateFor('menu'), '');
     const handlePopState = (event: PopStateEvent) => {
       const historyView = viewFromHistory(event.state);
-      if (historyView === 'stats') {
-        setShowStats(true);
-        setPendingGame(null);
-        setView('menu');
-      } else if (historyView === 'setup') {
-        setShowStats(false);
+      if (historyView === 'setup') {
+        return;
       } else if (historyView === 'menu') {
-        setShowStats(false);
         setPendingGame(null);
         setView('menu');
       } else if (historyView) {
-        setShowStats(false);
         setPendingGame(null);
         setView(historyView);
       } else {
-        setShowStats(false);
         setPendingGame(null);
         setView('menu');
       }
@@ -106,7 +100,6 @@ export function ReactApp(): ReactElement {
 
   const returnToMenu = () => {
     setPendingGame(null);
-    setShowStats(false);
     if (viewFromHistory(window.history.state) !== 'menu') {
       window.history.back();
       return;
@@ -116,16 +109,11 @@ export function ReactApp(): ReactElement {
 
   useEffect(() => {
     const isSubPage = view !== 'menu';
-    const isModalOpen = Boolean(pendingGame || showStats);
+    const isModalOpen = Boolean(pendingGame);
     const shouldShowBack = isSubPage || isModalOpen;
 
     const handleBack = () => {
-      if (showStats) {
-        setShowStats(false);
-        if (viewFromHistory(window.history.state) === 'stats') {
-          window.history.back();
-        }
-      } else if (pendingGame) {
+      if (pendingGame) {
         setPendingGame(null);
         if (viewFromHistory(window.history.state) === 'setup') {
           window.history.back();
@@ -136,7 +124,7 @@ export function ReactApp(): ReactElement {
     };
 
     return setEitaaBackButton(shouldShowBack, handleBack);
-  }, [view, pendingGame, showStats]);
+  }, [view, pendingGame]);
 
   const updateSetting = (key: SettingKey) => {
     setSettings((current) => {
@@ -144,6 +132,22 @@ export function ReactApp(): ReactElement {
       saveSettings(next);
       return next;
     });
+  };
+
+  const updatePlayerName = (player: keyof PlayerNames, name: string) => {
+    setPlayerNames((current) => {
+      const next = { ...current, [player]: limitPlayerName(name) };
+      savePlayerNames(next);
+      return next;
+    });
+  };
+
+  const activePlayerNames: PlayerNames = {
+    X: normalizePlayerName(playerNames.X) || translate(language, 'player1'),
+    O:
+      gameSetup.mode === 'bot'
+        ? translate(language, `${gameSetup.difficulty}Bot`)
+        : normalizePlayerName(playerNames.O) || translate(language, 'player2'),
   };
 
   const navigate = (nextView: View) => {
@@ -204,10 +208,6 @@ export function ReactApp(): ReactElement {
       {view === 'menu' && (
         <MenuPage
           onNavigate={navigate}
-          onOpenStats={() => {
-            window.history.pushState(historyStateFor('stats'), '');
-            setShowStats(true);
-          }}
           canInstall={Boolean((installPrompt && !isInstalled) || eitaaCanAddToHomeScreen)}
           onInstall={installApp}
           updateVersion={pwaUpdate.availableVersion}
@@ -217,13 +217,22 @@ export function ReactApp(): ReactElement {
           onDismissUpdate={() => setDismissedUpdate(pwaUpdate.availableVersion)}
         />
       )}
-      {view === 'settings' && <SettingsPage settings={settings} onChange={updateSetting} onBack={returnToMenu} />}
-      {view === 'tic' && <TicTacToePage setup={gameSetup} onExit={returnToMenu} />}
-      {view === 'memory' && <MemoryMatchPage setup={gameSetup} onExit={returnToMenu} />}
-      {view === 'reaction' && <ReactionDuelPage setup={gameSetup} onExit={returnToMenu} />}
-      {view === 'connect' && <ConnectFourPage setup={gameSetup} onExit={returnToMenu} />}
-      {view === 'dots' && <DotsBoxesPage setup={gameSetup} onExit={returnToMenu} />}
-      {view === 'reversi' && <ReversiPage setup={gameSetup} onExit={returnToMenu} />}
+      {view === 'settings' && (
+        <SettingsPage
+          settings={settings}
+          playerNames={playerNames}
+          onChange={updateSetting}
+          onPlayerNameChange={updatePlayerName}
+          onBack={returnToMenu}
+        />
+      )}
+      {view === 'stats' && <StatsPage onBack={returnToMenu} />}
+      {view === 'tic' && <TicTacToePage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
+      {view === 'memory' && <MemoryMatchPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
+      {view === 'reaction' && <ReactionDuelPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
+      {view === 'connect' && <ConnectFourPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
+      {view === 'dots' && <DotsBoxesPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
+      {view === 'reversi' && <ReversiPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {pendingGame && (
         <GameSetupDialog
           gameTitle={gameTitle(pendingGame, language)}
@@ -236,16 +245,6 @@ export function ReactApp(): ReactElement {
             }
           }}
           onStart={startGame}
-        />
-      )}
-      {showStats && (
-        <StatsDialog
-          onClose={() => {
-            setShowStats(false);
-            if (viewFromHistory(window.history.state) === 'stats') {
-              window.history.back();
-            }
-          }}
         />
       )}
     </div>
@@ -275,7 +274,7 @@ function viewFromHistory(state: unknown): HistoryView | null {
     : null;
 }
 
-function gameTitle(view: Exclude<View, 'menu' | 'settings'>, language: Language): string {
+function gameTitle(view: Exclude<View, 'menu' | 'settings' | 'stats'>, language: Language): string {
   if (view === 'tic') return translate(language, 'ticTacToe');
   if (view === 'memory') return translate(language, 'memoryMatch');
   if (view === 'reaction') return translate(language, 'reactionDuel');
@@ -286,7 +285,6 @@ function gameTitle(view: Exclude<View, 'menu' | 'settings'>, language: Language)
 
 function MenuPage({
   onNavigate,
-  onOpenStats,
   canInstall,
   onInstall,
   updateVersion,
@@ -296,7 +294,6 @@ function MenuPage({
   onDismissUpdate,
 }: {
   onNavigate: (view: View) => void;
-  onOpenStats: () => void;
   canInstall: boolean;
   onInstall: () => void;
   updateVersion: string | null;
@@ -348,7 +345,7 @@ function MenuPage({
             className="icon-btn"
             onClick={() => {
               playTapSound();
-              onOpenStats();
+              onNavigate('stats');
             }}
             aria-label={t('statsTitle')}
           >

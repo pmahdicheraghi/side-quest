@@ -1,4 +1,4 @@
-export type View = 'menu' | 'tic' | 'memory' | 'reaction' | 'connect' | 'dots' | 'reversi' | 'settings';
+export type View = 'menu' | 'tic' | 'memory' | 'reaction' | 'connect' | 'dots' | 'reversi' | 'settings' | 'stats';
 export type GameMode = 'bot' | 'two';
 export type Player = 'X' | 'O';
 export type GameDifficulty = 'easy' | 'normal' | 'hard';

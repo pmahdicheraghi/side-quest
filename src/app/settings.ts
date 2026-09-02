@@ -1,6 +1,6 @@
 import { triggerEitaaHaptic } from './eitaa';
 
-export type SettingKey = 'animations' | 'music' | 'sfx' | 'haptics' | 'highContrast';
+export type SettingKey = 'animations' | 'music' | 'sfx' | 'haptics';
 
 export type Settings = Record<SettingKey, boolean>;
 
@@ -9,7 +9,6 @@ export const defaultSettings: Settings = {
   music: true,
   sfx: true,
   haptics: true,
-  highContrast: false,
 };
 
 const STORAGE_KEY = 'side-quest-settings';
@@ -33,7 +32,6 @@ export function saveSettings(settings: Settings): void {
 
 export function applySettings(settings: Settings): void {
   document.documentElement.classList.toggle('no-motion', !settings.animations);
-  document.documentElement.classList.toggle('high-contrast', settings.highContrast);
 }
 
 export function triggerHaptic(pattern: number | number[] = 8): void {

@@ -9,10 +9,11 @@ import { playMoveSound, playPairSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
 import { chooseReversiBotMove, countDiscs, createReversiBoard, getValidMoves, makeMove, type ReversiCell } from './reversi-logic';
 import './reversi.css';
+import type { PlayerNames } from '../../app/player-names';
 
 const FLIP_SETTLE_MS = 380;
 
-export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () => void }) {
+export function ReversiPage({ setup, playerNames, onExit }: { setup: GameSetup; playerNames: PlayerNames; onExit: () => void }) {
   const { language, t } = useI18n();
   const mode = setup.mode;
   const [board, setBoard] = useState<ReversiCell[]>(createReversiBoard);
@@ -92,7 +93,7 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
     }
     if (round >= setup.rounds) {
       const outcome = nextScores.X === nextScores.O ? 'draw' : nextScores.X > nextScores.O ? 'win' : 'loss';
-      recordMatchResult('reversi', outcome);
+      recordMatchResult('reversi', outcome, { difficulty: mode === 'bot' ? setup.difficulty : undefined });
     }
   };
 
@@ -196,7 +197,7 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
     setIsSettling(false);
   };
 
-  const playerName = (player: Player) => t(player === 'X' ? 'player1' : mode === 'bot' ? 'bot' : 'player2');
+  const playerName = (player: Player) => playerNames[player];
   const matchComplete = Boolean(roundWinner) && round >= setup.rounds;
   const status = isSettling
     ? t('dotsCounting')
@@ -221,9 +222,9 @@ export function ReversiPage({ setup, onExit }: { setup: GameSetup; onExit: () =>
         onExit={onExit}
       />
       <ScoreStrip
-        leftLabel={t('player1')}
+        leftLabel={playerNames.X}
         leftMark="●"
-        rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
+        rightLabel={playerNames.O}
         rightMark="●"
         scores={matchScores}
         inGameScores={discCounts}

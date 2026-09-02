@@ -8,6 +8,7 @@ import './reaction-duel.css';
 import { useI18n } from '../../app/i18n';
 import { playErrorSound, playMoveSound, playPairSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
+import type { PlayerNames } from '../../app/player-names';
 import {
   getBotReactionDelay,
   getReactionMatchWinner,
@@ -16,7 +17,7 @@ import {
   type ReactionPhase,
 } from './reaction-duel-logic';
 
-export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: () => void }) {
+export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSetup; playerNames: PlayerNames; onExit: () => void }) {
   const { language, t } = useI18n();
   const mode = setup.mode;
   const [phase, setPhase] = useState<ReactionPhase>('idle');
@@ -96,7 +97,10 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
       if (round >= setup.rounds) {
         const matchWinner = getReactionMatchWinner(nextScores);
         const outcome = matchWinner === 'draw' ? 'draw' : matchWinner === 'X' ? 'win' : 'loss';
-        recordMatchResult('reaction', outcome, { reactionMs: bestReactionRef.current });
+        recordMatchResult('reaction', outcome, {
+          reactionMs: bestReactionRef.current,
+          difficulty: mode === 'bot' ? setup.difficulty : undefined,
+        });
       }
       return;
     }
@@ -117,12 +121,15 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
     if (round >= setup.rounds) {
       const matchWinner = getReactionMatchWinner(nextScores);
       const outcome = matchWinner === 'draw' ? 'draw' : matchWinner === 'X' ? 'win' : 'loss';
-      recordMatchResult('reaction', outcome, { reactionMs: bestReactionRef.current });
+      recordMatchResult('reaction', outcome, {
+        reactionMs: bestReactionRef.current,
+        difficulty: mode === 'bot' ? setup.difficulty : undefined,
+      });
     }
   };
 
   const matchComplete = phase === 'result' && round >= setup.rounds;
-  const playerName = (player: Player) => t(player === 'X' ? 'player1' : mode === 'bot' ? 'bot' : 'player2');
+  const playerName = (player: Player) => playerNames[player];
   const formatReaction = (reaction: number) =>
     `${new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(reaction)} ${t('milliseconds')}`;
   const matchWinner = getReactionMatchWinner(scores);
@@ -166,9 +173,9 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
         onExit={onExit}
       />
       <ScoreStrip
-        leftLabel={t('player1')}
+        leftLabel={playerNames.X}
         leftMark="✦"
-        rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
+        rightLabel={playerNames.O}
         rightMark="✦"
         scores={scores}
         inGameScores={{
@@ -201,7 +208,7 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
           }}
           disabled={!running}
         >
-          <span>{t('player1')}</span>
+          <span>{playerNames.X}</span>
           <strong>{t('tap')}</strong>
           <small>{label('X')}</small>
         </button>
@@ -217,7 +224,7 @@ export function ReactionDuelPage({ setup, onExit }: { setup: GameSetup; onExit: 
           }}
           disabled={!running || mode === 'bot'}
         >
-          <span>{t(mode === 'bot' ? 'bot' : 'player2')}</span>
+          <span>{playerNames.O}</span>
           <strong>{t('tap')}</strong>
           <small>{label('O')}</small>
         </button>

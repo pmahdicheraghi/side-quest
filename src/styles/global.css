@@ -551,12 +551,6 @@ p {
   color: var(--acid);
   background: var(--acid-tint);
 }
-.high-contrast {
-  --muted: #c1ccc3;
-  --line: var(--line-strong);
-  --panel: #24332d;
-  --panel-2: #2d3e36;
-}
 .no-motion *,
 .no-motion *::before,
 .no-motion *::after {

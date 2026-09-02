@@ -1,6 +1,6 @@
-import type { View } from './types';
+import type { GameDifficulty, View } from './types';
 
-export type GameKey = Exclude<View, 'menu' | 'settings'>;
+export type GameKey = Exclude<View, 'menu' | 'settings' | 'stats'>;
 
 export const GAME_KEYS: readonly GameKey[] = ['tic', 'memory', 'reaction', 'connect', 'dots', 'reversi'] as const;
 
@@ -11,6 +11,7 @@ export interface GameStats {
   draws: number;
   streak: number;
   bestStreak: number;
+  winsByDifficulty: Record<GameDifficulty, number>;
   bestReactionMs?: number;
 }
 
@@ -26,6 +27,7 @@ function createDefaultGameStats(): GameStats {
     draws: 0,
     streak: 0,
     bestStreak: 0,
+    winsByDifficulty: { easy: 0, normal: 0, hard: 0 },
   };
 }
 
@@ -56,6 +58,11 @@ export function loadStats(): AllStats {
           draws: Number(item.draws) || 0,
           streak: Number(item.streak) || 0,
           bestStreak: Number(item.bestStreak) || 0,
+          winsByDifficulty: {
+            easy: Number(item.winsByDifficulty?.easy) || 0,
+            normal: Number(item.winsByDifficulty?.normal) || 0,
+            hard: Number(item.winsByDifficulty?.hard) || 0,
+          },
           bestReactionMs: typeof item.bestReactionMs === 'number' && item.bestReactionMs > 0 ? item.bestReactionMs : undefined,
         };
       }
@@ -74,7 +81,11 @@ export function saveStats(stats: AllStats): void {
   }
 }
 
-export function recordMatchResult(game: GameKey, outcome: 'win' | 'loss' | 'draw', extras?: { reactionMs?: number }): AllStats {
+export function recordMatchResult(
+  game: GameKey,
+  outcome: 'win' | 'loss' | 'draw',
+  extras?: { reactionMs?: number; difficulty?: GameDifficulty },
+): AllStats {
   const all = loadStats();
   const current = all[game] ?? createDefaultGameStats();
 
@@ -93,6 +104,10 @@ export function recordMatchResult(game: GameKey, outcome: 'win' | 'loss' | 'draw
     draws: current.draws + (outcome === 'draw' ? 1 : 0),
     streak: nextStreak,
     bestStreak: nextBestStreak,
+    winsByDifficulty: {
+      ...current.winsByDifficulty,
+      ...(outcome === 'win' && extras?.difficulty ? { [extras.difficulty]: current.winsByDifficulty[extras.difficulty] + 1 } : {}),
+    },
     bestReactionMs: nextBestReaction,
   };
 

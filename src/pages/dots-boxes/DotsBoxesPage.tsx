@@ -19,10 +19,11 @@ import {
   type DotEdges,
 } from './dots-boxes-logic';
 import './dots-boxes.css';
+import type { PlayerNames } from '../../app/player-names';
 
 const BOARD_SETTLE_MS = 320;
 
-export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () => void }) {
+export function DotsBoxesPage({ setup, playerNames, onExit }: { setup: GameSetup; playerNames: PlayerNames; onExit: () => void }) {
   const { language, t } = useI18n();
   const mode = setup.mode;
   const [edges, setEdges] = useState<DotEdges>({});
@@ -70,7 +71,7 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
     if (result !== 'draw') setMatchScores(nextScores);
     if (round >= setup.rounds) {
       const outcome = nextScores.X === nextScores.O ? 'draw' : nextScores.X > nextScores.O ? 'win' : 'loss';
-      recordMatchResult('dots', outcome);
+      recordMatchResult('dots', outcome, { difficulty: mode === 'bot' ? setup.difficulty : undefined });
     }
   };
 
@@ -139,7 +140,7 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
 
   useEffect(() => () => stopFinishTimer(), []);
 
-  const playerName = (player: Player) => t(player === 'X' ? 'player1' : mode === 'bot' ? 'bot' : 'player2');
+  const playerName = (player: Player) => playerNames[player];
   const matchComplete = Boolean(roundWinner) && round >= setup.rounds;
   const status = isSettling
     ? t('dotsCounting')
@@ -169,9 +170,9 @@ export function DotsBoxesPage({ setup, onExit }: { setup: GameSetup; onExit: () 
         onExit={onExit}
       />
       <ScoreStrip
-        leftLabel={t('player1')}
+        leftLabel={playerNames.X}
         leftMark="■"
-        rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
+        rightLabel={playerNames.O}
         rightMark="■"
         scores={matchScores}
         inGameScores={{

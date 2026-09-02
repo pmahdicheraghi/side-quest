@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n } from '../app/i18n';
 import { Icon } from './react-layout';
 import { GAME_KEYS, loadStats, resetAllStats, type AllStats, type GameKey } from '../app/stats';
 import { playTapSound } from '../app/sfx';
+import { animateIn } from '../app/animation';
+import type { GameDifficulty } from '../app/types';
+
+const DIFFICULTIES: readonly GameDifficulty[] = ['easy', 'normal', 'hard'];
 
 function gameTitle(key: GameKey, t: ReturnType<typeof useI18n>['t']): string {
   switch (key) {
@@ -38,18 +42,13 @@ function gameIcon(key: GameKey): string {
   }
 }
 
-export function StatsDialog({ onClose }: { onClose: () => void }): ReactElement {
+export function StatsPage({ onBack }: { onBack: () => void }): ReactElement {
   const { language, t } = useI18n();
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const [stats, setStats] = useState<AllStats>(() => loadStats());
   const [confirmReset, setConfirmReset] = useState(false);
   const numberFormatter = new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en');
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (dialog && !dialog.open) dialog.showModal();
-    return () => dialog?.close();
-  }, []);
+  useEffect(() => animateIn('.stats-page-intro > *, .stats-overview, .stats-game-row'), []);
 
   const totalPlayed = GAME_KEYS.reduce((acc, k) => acc + stats[k].played, 0);
   const totalWins = GAME_KEYS.reduce((acc, k) => acc + stats[k].wins, 0);
@@ -68,59 +67,64 @@ export function StatsDialog({ onClose }: { onClose: () => void }): ReactElement 
   };
 
   return (
-    <dialog
-      ref={dialogRef}
-      className="setup-dialog stats-dialog"
-      aria-labelledby="stats-dialog-title"
-      onCancel={(event) => {
-        event.preventDefault();
-        onClose();
-      }}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
-      <div className="setup-dialog-card stats-dialog-card">
+    <main className="shell stats-screen">
+      <header className="topbar settings-topbar">
         <button
           type="button"
-          className="setup-close"
+          className="icon-btn"
           onClick={() => {
             playTapSound();
-            onClose();
+            onBack();
           }}
-          aria-label={t('closeStats')}
+          aria-label={t('backToMenu')}
         >
-          ×
+          <Icon name="back" />
         </button>
+        <span className="topbar-title">{t('statsTitle')}</span>
+        <span className="topbar-spacer" aria-hidden="true" />
+      </header>
 
-        <div className="setup-eyebrow">
+      <section className="stats-page-intro">
+        <div className="eyebrow align-left">
           <Icon name="trophy" /> {t('stats')}
         </div>
-        <h2 id="stats-dialog-title">{t('statsTitle')}</h2>
+        <h1>{t('statsTitle')}</h1>
         <p>{t('statsIntro')}</p>
+      </section>
 
+      <section className="stats-page-content">
         {totalPlayed === 0 ? (
           <div className="stats-empty-state">
+            <span className="stats-empty-icon" aria-hidden="true">
+              <Icon name="trophy" />
+            </span>
             <p>{t('noStatsYet')}</p>
           </div>
         ) : (
           <>
-            <div className="stats-summary-grid">
-              <div className="stats-summary-card">
-                <span className="stats-summary-val">{numberFormatter.format(totalPlayed)}</span>
-                <span className="stats-summary-label">{t('totalMatches')}</span>
+            <div className="stats-overview">
+              <div
+                className="stats-win-ring"
+                style={{ background: `conic-gradient(var(--acid) ${overallWinRate}%, var(--surface-tint) 0)` }}
+              >
+                <div>
+                  <strong>{numberFormatter.format(overallWinRate)}%</strong>
+                  <span>{t('winRate')}</span>
+                </div>
               </div>
-              <div className="stats-summary-card">
-                <span className="stats-summary-val stats-highlight">{numberFormatter.format(totalWins)}</span>
-                <span className="stats-summary-label">{t('totalWins')}</span>
-              </div>
-              <div className="stats-summary-card">
-                <span className="stats-summary-val">{numberFormatter.format(overallWinRate)}%</span>
-                <span className="stats-summary-label">{t('winRate')}</span>
-              </div>
-              <div className="stats-summary-card">
-                <span className="stats-summary-val">{numberFormatter.format(bestOverallStreak)}</span>
-                <span className="stats-summary-label">{t('bestStreak')}</span>
+              <div className="stats-summary-grid">
+                <div className="stats-summary-card">
+                  <span className="stats-summary-val">{numberFormatter.format(totalPlayed)}</span>
+                  <span className="stats-summary-label">{t('totalMatches')}</span>
+                </div>
+                <div className="stats-summary-card">
+                  <span className="stats-summary-val stats-highlight">{numberFormatter.format(totalWins)}</span>
+                  <span className="stats-summary-label">{t('totalWins')}</span>
+                </div>
+                <div className="stats-summary-card">
+                  <span className="stats-summary-val">{numberFormatter.format(bestOverallStreak)}</span>
+                  <span className="stats-summary-label">{t('bestStreak')}</span>
+                </div>
               </div>
             </div>
 
@@ -138,6 +142,9 @@ export function StatsDialog({ onClose }: { onClose: () => void }): ReactElement 
                       <span className="stats-game-winrate">
                         {numberFormatter.format(winPct)}% {t('winRate')}
                       </span>
+                    </div>
+                    <div className="stats-game-progress" aria-hidden="true">
+                      <span style={{ width: `${winPct}%` }} />
                     </div>
 
                     <div className="stats-game-metrics">
@@ -170,6 +177,17 @@ export function StatsDialog({ onClose }: { onClose: () => void }): ReactElement 
                         </div>
                       )}
                     </div>
+                    <div className="stats-difficulty-wins">
+                      <span className="stats-difficulty-label">{t('winsByDifficulty')}</span>
+                      <div>
+                        {DIFFICULTIES.map((difficulty) => (
+                          <span className={`stats-difficulty-chip difficulty-${difficulty}`} key={difficulty}>
+                            <small>{t(difficulty)}</small>
+                            <b>{numberFormatter.format(s.winsByDifficulty[difficulty])}</b>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 );
               })}
@@ -189,13 +207,13 @@ export function StatsDialog({ onClose }: { onClose: () => void }): ReactElement 
             className="primary-btn"
             onClick={() => {
               playTapSound();
-              onClose();
+              onBack();
             }}
           >
             {t('backToMenuAction')}
           </button>
         </div>
-      </div>
-    </dialog>
+      </section>
+    </main>
   );
 }

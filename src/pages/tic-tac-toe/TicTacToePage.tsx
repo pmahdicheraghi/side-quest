@@ -18,8 +18,9 @@ import {
   type TicState,
 } from './tic-tac-toe-logic';
 import './tic-tac-toe.css';
+import type { PlayerNames } from '../../app/player-names';
 
-export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () => void }) {
+export function TicTacToePage({ setup, playerNames, onExit }: { setup: GameSetup; playerNames: PlayerNames; onExit: () => void }) {
   const { language, t } = useI18n();
   const mode = setup.mode;
   const [game, setGame] = useState<TicState>(createTicState);
@@ -38,7 +39,7 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
     setScores(nextScores);
     if (round >= setup.rounds) {
       const outcome = nextScores.X === nextScores.O ? 'draw' : nextScores.X > nextScores.O ? 'win' : 'loss';
-      recordMatchResult('tic', outcome);
+      recordMatchResult('tic', outcome, { difficulty: mode === 'bot' ? setup.difficulty : undefined });
     }
     if (human) {
       triggerHaptic([18, 35, 18]);
@@ -98,7 +99,7 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
 
   const matchComplete = Boolean(winner) && round >= setup.rounds;
   const expiringCells = [getExpiringTicCell(game, 'X'), getExpiringTicCell(game, 'O')];
-  const playerName = (player: Player) => t(player === 'X' ? 'player1' : mode === 'bot' ? 'bot' : 'player2');
+  const playerName = (player: Player) => playerNames[player];
   const status = winner
     ? matchComplete
       ? scores.X === scores.O
@@ -118,9 +119,9 @@ export function TicTacToePage({ setup, onExit }: { setup: GameSetup; onExit: () 
         onExit={onExit}
       />
       <ScoreStrip
-        leftLabel={t('player1')}
+        leftLabel={playerNames.X}
         leftMark="×"
-        rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
+        rightLabel={playerNames.O}
         rightMark="○"
         scores={scores}
         inGameScores={{

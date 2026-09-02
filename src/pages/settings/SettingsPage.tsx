@@ -5,6 +5,7 @@ import { Icon } from '../../components/react-layout';
 import { useI18n, type TranslationKey } from '../../app/i18n';
 import { LanguageSelect } from '../../components/LanguageSelect';
 import { playTapSound } from '../../app/sfx';
+import { PLAYER_NAME_MAX_LENGTH, type PlayerNames } from '../../app/player-names';
 import './settings.css';
 
 type SettingOption = { key: SettingKey; label: TranslationKey; description: TranslationKey };
@@ -14,16 +15,19 @@ const OPTIONS: SettingOption[] = [
   { key: 'music', label: 'musicSetting', description: 'musicDescription' },
   { key: 'sfx', label: 'sfxSetting', description: 'sfxDescription' },
   { key: 'haptics', label: 'haptics', description: 'hapticsDescription' },
-  { key: 'highContrast', label: 'highContrast', description: 'highContrastDescription' },
 ];
 
 export function SettingsPage({
   settings,
+  playerNames,
   onChange,
+  onPlayerNameChange,
   onBack,
 }: {
   settings: Settings;
+  playerNames: PlayerNames;
   onChange: (key: SettingKey) => void;
+  onPlayerNameChange: (player: keyof PlayerNames, name: string) => void;
   onBack: () => void;
 }) {
   const { t } = useI18n();
@@ -58,6 +62,29 @@ export function SettingsPage({
         <p>{t('settingsIntro')}</p>
       </section>
       <section className="settings-list" aria-label={t('gamePreferences')}>
+        {(['X', 'O'] as const).map((player) => {
+          const label = player === 'X' ? t('player1') : t('player2');
+          return (
+            <label className="settings-row settings-name-row" key={player}>
+              <div className="settings-copy">
+                <strong>{label}</strong>
+                <span>{t('playerNameDescription')}</span>
+              </div>
+              <span className={`settings-name-field player-${player.toLowerCase()}`}>
+                <b aria-hidden="true">{player === 'X' ? '×' : '○'}</b>
+                <input
+                  type="text"
+                  value={playerNames[player]}
+                  maxLength={PLAYER_NAME_MAX_LENGTH}
+                  placeholder={label}
+                  aria-label={label}
+                  autoComplete="off"
+                  onChange={(event) => onPlayerNameChange(player, event.target.value)}
+                />
+              </span>
+            </label>
+          );
+        })}
         <div className="settings-row settings-language-row">
           <div className="settings-copy">
             <strong>{t('language')}</strong>

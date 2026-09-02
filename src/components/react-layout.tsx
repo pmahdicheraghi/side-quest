@@ -123,18 +123,9 @@ export function ScoreStrip({
   );
 }
 
-
 const MATCH_RESULT_DURATION = 3500;
 
-export function MatchResultToast({
-  message,
-  gameTitle: _gameTitle,
-  onExit,
-}: {
-  message: string;
-  gameTitle?: string;
-  onExit?: () => void;
-}) {
+export function MatchResultToast({ message, gameTitle: _gameTitle, onExit }: { message: string; gameTitle?: string; onExit?: () => void }) {
   const { t } = useI18n();
   const [visible, setVisible] = useState(true);
 

@@ -19,8 +19,9 @@ import {
   type MemoryCard,
 } from './memory-match-logic';
 import './memory-match.css';
+import type { PlayerNames } from '../../app/player-names';
 
-export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: () => void }) {
+export function MemoryMatchPage({ setup, playerNames, onExit }: { setup: GameSetup; playerNames: PlayerNames; onExit: () => void }) {
   const { language, t } = useI18n();
   const mode = setup.mode;
   const [cards, setCards] = useState<MemoryCard[]>(createMemoryDeck);
@@ -108,7 +109,7 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
             }
             if (round >= setup.rounds) {
               const outcome = nextMatchScores.X === nextMatchScores.O ? 'draw' : nextMatchScores.X > nextMatchScores.O ? 'win' : 'loss';
-              recordMatchResult('memory', outcome);
+              recordMatchResult('memory', outcome, { difficulty: mode === 'bot' ? setup.difficulty : undefined });
             }
           }
         } else {
@@ -150,7 +151,7 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
 
   const finished = matchedPairs === MEMORY_SYMBOLS.length;
   const matchComplete = finished && round >= setup.rounds;
-  const playerName = (player: Player) => t(player === 'X' ? 'player1' : mode === 'bot' ? 'bot' : 'player2');
+  const playerName = (player: Player) => playerNames[player];
   const status = finished
     ? matchComplete
       ? matchScores.X === matchScores.O
@@ -172,9 +173,9 @@ export function MemoryMatchPage({ setup, onExit }: { setup: GameSetup; onExit: (
         onExit={onExit}
       />
       <ScoreStrip
-        leftLabel={t('player1')}
+        leftLabel={playerNames.X}
         leftMark="✦"
-        rightLabel={t(mode === 'bot' ? `${setup.difficulty}Bot` : 'player2')}
+        rightLabel={playerNames.O}
         rightMark="●"
         scores={matchScores}
         inGameScores={roundScores}
