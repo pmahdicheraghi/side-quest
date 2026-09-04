@@ -41,7 +41,7 @@
   position: relative;
   z-index: 3;
   border-radius: var(--radius-round);
-  background: var(--dots-card-bg);
+  background: var(--game-accent);
   box-shadow: 0 0 0 3px var(--game-wash);
 }
 

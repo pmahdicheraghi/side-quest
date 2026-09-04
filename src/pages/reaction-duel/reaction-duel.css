@@ -6,7 +6,7 @@
   margin: auto;
   border: var(--border-thin) solid var(--game-border);
   border-radius: var(--radius-lg);
-  background: var(--reaction-arena-end);
+  background: var(--bg);
   box-shadow: var(--shadow-inset-highlight);
   transition:
     background var(--duration-slow) var(--ease-standard),
@@ -14,8 +14,8 @@
 }
 
 .reaction-arena.phase-go {
-  border-color: var(--reaction-card-bg);
-  background: var(--reaction-go-end);
+  border-color: var(--game-accent);
+  background: var(--panel-2);
 }
 
 .reaction-player-zones {
@@ -35,7 +35,7 @@
   gap: 5px;
   border-radius: 0;
   background: var(--game-wash);
-  color: var(--reaction-card-bg);
+  color: var(--game-accent);
   transition:
     background var(--duration-normal) var(--ease-standard),
     filter var(--duration-normal) var(--ease-standard),
@@ -45,8 +45,8 @@
 
 .reaction-player.player-two {
   border-inline-start: var(--border-thin) solid var(--line);
-  background: var(--reaction-coral-wash);
-  color: var(--reaction-coral);
+  background: var(--orange-wash);
+  color: var(--orange);
 }
 
 .reaction-player:focus-visible {
@@ -77,7 +77,7 @@
 }
 
 .reaction-player.player-two.is-winner {
-  background: var(--reaction-coral-wash);
+  background: var(--orange-wash);
 }
 
 .reaction-player.is-false-start {
@@ -137,9 +137,9 @@
   border: var(--border-strong) solid var(--game-border);
   border-radius: var(--radius-round);
   background: var(--game-wash);
-  color: var(--reaction-card-bg);
+  color: var(--game-accent);
   box-shadow:
-    0 0 0 13px var(--reaction-coral-wash),
+    0 0 0 13px var(--orange-wash),
     0 0 0 28px var(--game-wash);
   font-family: var(--font-mono);
   font-size: 18px;
@@ -154,12 +154,12 @@
 }
 
 .signal-orb.signal-go {
-  border: var(--border-heavy) solid var(--reaction-card-bg);
-  background: var(--reaction-light);
-  color: var(--reaction-go-ink);
+  border: var(--border-heavy) solid var(--game-accent);
+  background: var(--ink);
+  color: var(--game-accent-ink);
   box-shadow:
-    0 0 0 14px var(--reaction-light-wash),
-    0 0 0 30px var(--reaction-coral-wash);
+    0 0 0 14px color-mix(in srgb, var(--ink) 35%, transparent),
+    0 0 0 30px var(--orange-wash);
   font-size: 20px;
   font-weight: 700;
 }
@@ -180,17 +180,17 @@
 }
 
 .phase-go .reaction-status {
-  color: var(--reaction-card-bg);
+  color: var(--game-accent);
 }
 
 .reaction-screen .score-mark.x-label,
 .reaction-screen .score-player-x.is-leading strong {
-  color: var(--reaction-card-bg);
+  color: var(--game-accent);
 }
 
 .reaction-screen .score-mark.o-label,
 .reaction-screen .score-player-o.is-leading strong {
-  color: var(--reaction-coral);
+  color: var(--orange);
 }
 
 .reaction-screen .score-mark.x-label.is-active {
@@ -198,7 +198,7 @@
 }
 
 .reaction-screen .score-mark.o-label.is-active {
-  border-color: var(--reaction-coral-border);
+  border-color: var(--orange-border-soft);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -210,7 +210,7 @@
 @keyframes reaction-pulse {
   50% {
     box-shadow:
-      0 0 0 18px var(--reaction-coral-wash),
+      0 0 0 18px var(--orange-wash),
       0 0 0 36px var(--game-wash);
   }
 }

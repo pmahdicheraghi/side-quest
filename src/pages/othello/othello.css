@@ -5,7 +5,7 @@
 .othello-board {
   --valid-color: var(--acid);
   --valid-wash: var(--acid-tint);
-  --board-surface-bg: var(--othello-board-frame);
+  --board-surface-bg: #1b4935;
   width: min(100%, 400px);
   margin: auto;
   display: grid;
@@ -29,7 +29,7 @@
   padding: 0;
   border: var(--border-thin) solid var(--game-border);
   border-radius: var(--radius-round);
-  background: var(--othello-board-bg);
+  background: #143527;
   cursor: default;
   outline-offset: calc(var(--border-strong) * -1);
   perspective: 160px;

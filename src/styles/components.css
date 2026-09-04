@@ -116,7 +116,7 @@
   color: var(--ink);
 }
 .setup-dialog::backdrop {
-  background: var(--backdrop);
+  background: rgb(6 10 9 / 78%);
 }
 .setup-dialog-card {
   position: relative;
@@ -462,7 +462,7 @@ html[dir='rtl'] .setup-dialog h2 {
   color: var(--acid);
 }
 .stats-metric-reflex b {
-  color: var(--reaction-card-bg);
+  color: var(--game-accent);
 }
 .stats-difficulty-wins {
   display: flex;

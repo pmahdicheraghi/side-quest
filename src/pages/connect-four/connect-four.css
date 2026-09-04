@@ -3,7 +3,7 @@
 }
 
 .connect-board {
-  --board-surface-bg: var(--connect-board-frame);
+  --board-surface-bg: #292055;
   width: min(100%, 420px);
   margin: auto;
   display: grid;
@@ -33,7 +33,7 @@
   overflow: hidden;
   border: var(--border-thin) solid var(--game-border);
   border-radius: var(--radius-round);
-  background: var(--connect-board-bg);
+  background: #403574;
 }
 
 .connect-disc {

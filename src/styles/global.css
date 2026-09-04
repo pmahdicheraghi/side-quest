@@ -42,6 +42,7 @@ button {
   border: 0;
   cursor: pointer;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 button:focus-visible {
   outline: var(--focus-ring-width) solid var(--game-accent, var(--acid));
@@ -585,6 +586,8 @@ h1 em {
   position: relative;
   padding: 19px;
   border: var(--border-thin) solid var(--line);
+  background: var(--game-accent);
+  color: var(--game-accent-ink);
   transition:
     transform var(--duration-normal) var(--ease-standard),
     border-color var(--duration-normal) var(--ease-standard);
@@ -605,7 +608,7 @@ h1 em {
 .card-arrow {
   width: 31px;
   height: 31px;
-  border: var(--border-thin) solid var(--card-ink-border);
+  border: var(--border-thin) solid color-mix(in srgb, currentColor 30%, transparent);
   border-radius: var(--radius-round);
   display: grid;
   place-items: center;
@@ -620,12 +623,9 @@ h1 em {
   opacity: 0.27;
   pointer-events: none;
 }
-.tic-card {
-  background: var(--tic-card-bg);
-  color: var(--tic-card-ink);
-}
-.tic-card .game-number {
-  color: var(--tic-card-muted);
+.game-card .game-number {
+  color: var(--game-accent-ink);
+  opacity: 0.68;
 }
 .tic-visual {
   font-family: var(--font-mono);
@@ -640,17 +640,8 @@ h1 em {
 }
 .tic-visual span:nth-child(2),
 .tic-visual span:nth-child(4) {
-  color: var(--tic-mark-muted);
-}
-.memory-card {
-  background: var(--memory-card-bg);
-  color: var(--memory-card-ink);
-}
-.memory-card .game-number {
-  color: var(--memory-card-muted);
-}
-.reaction-card .game-number {
-  color: var(--reaction-card-muted);
+  color: var(--game-accent-ink);
+  opacity: 0.85;
 }
 .memory-visual {
   display: grid;
@@ -671,31 +662,6 @@ h1 em {
 .memory-visual span:nth-child(6) {
   transform: translateY(-18px);
 }
-.reaction-card {
-  background: var(--reaction-card-bg);
-  color: var(--reaction-card-ink);
-}
-.connect-card {
-  background: var(--connect-card-bg);
-  color: var(--connect-card-ink);
-}
-.connect-card .game-number {
-  color: var(--connect-card-muted);
-}
-.dots-card {
-  background: var(--dots-card-bg);
-  color: var(--dots-card-ink);
-}
-.dots-card .game-number {
-  color: var(--dots-card-muted);
-}
-.othello-card {
-  background: var(--othello-card-bg);
-  color: var(--othello-card-ink);
-}
-.othello-card .game-number {
-  color: var(--othello-card-muted);
-}
 .reaction-visual {
   display: grid;
   place-items: center;
@@ -704,18 +670,18 @@ h1 em {
 .reaction-dot {
   width: 60px;
   height: 60px;
-  background: var(--reaction-light);
-  border: var(--reaction-orb-ring-width) solid var(--reaction-coral);
+  background: var(--ink);
+  border: 11px solid var(--orange);
   border-radius: var(--radius-round);
   box-shadow:
-    0 0 0 17px var(--reaction-light-wash),
-    0 0 0 34px var(--reaction-coral-wash);
+    0 0 0 17px color-mix(in srgb, var(--ink) 35%, transparent),
+    0 0 0 34px color-mix(in srgb, var(--orange) 15%, transparent);
 }
 .reaction-wave {
   position: absolute;
   width: 180px;
   height: 180px;
-  border: var(--border-strong) solid var(--reaction-coral);
+  border: var(--border-strong) solid var(--orange);
   border-radius: var(--radius-round);
 }
 .reaction-wave.two {
@@ -736,7 +702,7 @@ h1 em {
   aspect-ratio: 1;
   align-self: center;
   border-radius: var(--radius-round);
-  background: var(--connect-card-muted);
+  background: color-mix(in srgb, var(--game-accent-ink) 68%, transparent);
   box-shadow: var(--shadow-card-inset);
 }
 .connect-visual .connect-dot-one {
@@ -770,7 +736,7 @@ h1 em {
   top: 50%;
   left: 50%;
   border-radius: var(--radius-round);
-  background: var(--dots-card-ink);
+  background: var(--game-accent-ink);
   transform: translate(-50%, -50%);
 }
 .dots-preview-dot:not(:nth-child(4n))::after {
@@ -813,7 +779,7 @@ h1 em {
 .othello-visual span {
   aspect-ratio: 1;
   border-radius: var(--radius-round);
-  background: var(--othello-preview-wash);
+  background: color-mix(in srgb, var(--game-accent-ink) 25%, transparent);
   box-shadow: var(--shadow-card-inset-soft);
 }
 .othello-visual .othello-dot-dark {

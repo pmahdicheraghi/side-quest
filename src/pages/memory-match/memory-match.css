@@ -49,7 +49,7 @@
   font-size: 22px;
 }
 .memory-grid .card-front {
-  color: var(--memory-front-ink);
+  color: var(--game-accent-ink);
   background: var(--game-accent, var(--acid));
   transform: rotateY(180deg);
   font-size: clamp(25px, 9vw, 40px);

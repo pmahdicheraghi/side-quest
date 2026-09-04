@@ -97,47 +97,6 @@
   --gradient-subtle: linear-gradient(135deg, var(--surface-tint), transparent);
   --gradient-game-row: linear-gradient(135deg, var(--game-wash), var(--surface-faint) 58%);
 
-  /* Game palette */
-  --tic-card-bg: #c9ed62;
-  --tic-card-ink: #1b281f;
-  --tic-card-muted: rgba(27, 40, 31, 0.68);
-  --card-ink-border: rgba(20, 28, 23, 0.3);
-  --tic-mark-muted: #28412f;
-  --memory-card-bg: #8dc3bd;
-  --memory-card-ink: #162b2b;
-  --memory-card-muted: rgba(22, 43, 43, 0.68);
-  --memory-front-ink: #1e2b25;
-  --reaction-card-bg: #f4c45c;
-  --reaction-card-ink: #2b281b;
-  --reaction-card-muted: rgba(43, 40, 27, 0.68);
-  --reaction-light: #fff6c7;
-  --reaction-orb-ring-width: 11px;
-  --reaction-light-wash: rgba(255, 246, 199, 0.35);
-  --reaction-coral: #dc765b;
-  --reaction-coral-wash: rgba(220, 118, 91, 0.15);
-  --reaction-coral-border: rgba(220, 118, 91, 0.35);
-  --reaction-arena-end: #15221e;
-  --reaction-go-end: #263b27;
-  --reaction-go-ink: #182419;
-  --connect-card-bg: #b49ae8;
-  --connect-card-ink: #251d33;
-  --connect-card-muted: rgba(37, 29, 51, 0.68);
-  --connect-board-frame: #292055;
-  --connect-board-bg: #403574;
-  --dots-card-bg: #78c8e3;
-  --dots-card-ink: #152a33;
-  --dots-card-muted: rgba(21, 42, 51, 0.66);
-  --othello-card-bg: #4fd18c;
-  --othello-card-ink: #0f2b1d;
-  --othello-card-muted: rgba(15, 43, 29, 0.68);
-  --othello-preview-wash: rgba(15, 43, 29, 0.25);
-  --othello-board-frame: #1b4935;
-  --othello-board-bg: #143527;
-  --backdrop: rgba(6, 10, 9, 0.78);
-  --switch-bg: #25312d;
-  --switch-thumb: #839088;
-  --switch-on-ink: #1d281d;
-
   --game-accent: var(--acid);
   --game-accent-ink: var(--ink-on-acid);
   --game-tint: var(--acid-tint);
@@ -151,49 +110,42 @@
 }
 
 .theme-tic {
-  --game-accent: var(--tic-card-bg);
-  --game-accent-ink: var(--tic-card-ink);
-  --game-tint: var(--acid-tint);
-  --game-wash: var(--acid-wash);
-  --game-border: var(--acid-border);
+  --game-accent: #c9ed62;
+  --game-accent-ink: #1b281f;
 }
 
 .theme-memory {
-  --game-accent: var(--memory-card-bg);
-  --game-accent-ink: var(--memory-card-ink);
-  --game-tint: rgba(141, 195, 189, 0.15);
-  --game-wash: rgba(141, 195, 189, 0.08);
-  --game-border: rgba(141, 195, 189, 0.35);
+  --game-accent: #8dc3bd;
+  --game-accent-ink: #162b2b;
 }
 
 .theme-reaction {
-  --game-accent: var(--reaction-card-bg);
-  --game-accent-ink: var(--reaction-card-ink);
-  --game-tint: rgba(244, 196, 92, 0.15);
-  --game-wash: rgba(244, 196, 92, 0.08);
-  --game-border: rgba(244, 196, 92, 0.35);
+  --game-accent: #f4c45c;
+  --game-accent-ink: #2b281b;
 }
 
 .theme-connect {
-  --game-accent: var(--connect-card-bg);
-  --game-accent-ink: var(--connect-card-ink);
-  --game-tint: rgba(180, 154, 232, 0.15);
-  --game-wash: rgba(180, 154, 232, 0.08);
-  --game-border: rgba(180, 154, 232, 0.35);
+  --game-accent: #b49ae8;
+  --game-accent-ink: #251d33;
 }
 
 .theme-dots {
-  --game-accent: var(--dots-card-bg);
-  --game-accent-ink: var(--dots-card-ink);
-  --game-tint: rgba(120, 200, 227, 0.15);
-  --game-wash: rgba(120, 200, 227, 0.08);
-  --game-border: rgba(120, 200, 227, 0.35);
+  --game-accent: #78c8e3;
+  --game-accent-ink: #152a33;
 }
 
 .theme-othello {
-  --game-accent: var(--othello-card-bg);
-  --game-accent-ink: var(--othello-card-ink);
-  --game-tint: rgba(79, 209, 140, 0.15);
-  --game-wash: rgba(79, 209, 140, 0.08);
-  --game-border: rgba(79, 209, 140, 0.35);
+  --game-accent: #4fd18c;
+  --game-accent-ink: #0f2b1d;
+}
+
+.theme-tic,
+.theme-memory,
+.theme-reaction,
+.theme-connect,
+.theme-dots,
+.theme-othello {
+  --game-tint: color-mix(in srgb, var(--game-accent) 15%, transparent);
+  --game-wash: color-mix(in srgb, var(--game-accent) 8%, transparent);
+  --game-border: color-mix(in srgb, var(--game-accent) 35%, transparent);
 }

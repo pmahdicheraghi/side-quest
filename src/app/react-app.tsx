@@ -393,7 +393,6 @@ function MenuPage({
           number={t('logic')}
           title={t('ticTacToe')}
           description={t('ticDescription')}
-          cardClass="tic-card"
           visual={
             <>
               <span>×</span>
@@ -420,7 +419,6 @@ function MenuPage({
           number={t('memory')}
           title={t('memoryMatch')}
           description={t('memoryDescription')}
-          cardClass="memory-card"
           visual={
             <>
               <span>✦</span>
@@ -448,7 +446,6 @@ function MenuPage({
           number={t('reflex')}
           title={t('reactionDuel')}
           description={t('reactionDescription')}
-          cardClass="reaction-card"
           visual={
             <>
               <span className="reaction-dot" />
@@ -473,7 +470,6 @@ function MenuPage({
           number={t('alignment')}
           title={t('connectFour')}
           description={t('connectDescription')}
-          cardClass="connect-card"
           visual={Array.from({ length: 28 }, (_, index) => (
             <span
               className={
@@ -499,7 +495,6 @@ function MenuPage({
           number={t('tactics')}
           title={t('dotsBoxes')}
           description={t('dotsDescription')}
-          cardClass="dots-card"
           visual={Array.from({ length: 16 }, (_, index) => (
             <span className={`dots-preview-dot dot-${index}`} key={index}>
               <i />
@@ -522,7 +517,6 @@ function MenuPage({
           number={t('territory')}
           title={t('othello')}
           description={t('othelloDescription')}
-          cardClass="othello-card"
           visual={Array.from({ length: 24 }, (_, index) => (
             <span
               className={[7, 8, 14].includes(index) ? 'othello-dot-dark' : [9, 15, 16].includes(index) ? 'othello-dot-light' : ''}
@@ -560,7 +554,6 @@ function GameCard({
   number,
   title,
   description,
-  cardClass,
   visual,
   firstMeta,
   secondMeta,
@@ -570,7 +563,6 @@ function GameCard({
   number: string;
   title: string;
   description: string;
-  cardClass: string;
   visual: ReactNode;
   firstMeta: ReactNode;
   secondMeta: ReactNode;
@@ -592,7 +584,7 @@ function GameCard({
   return (
     <button
       type="button"
-      className={`game-card ${cardClass}`}
+      className={`game-card theme-${view}`}
       onClick={() => {
         playTapSound();
         onSelect(view);

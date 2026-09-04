@@ -48,7 +48,7 @@
   min-width: 0;
   border: var(--border-thin) solid var(--line-strong);
   border-radius: var(--radius-sm);
-  background: var(--switch-bg);
+  background: var(--panel-2);
   transition: border-color var(--duration-normal) var(--ease-standard);
 }
 .settings-name-field:focus-within {
@@ -114,7 +114,7 @@ html[dir='rtl'] .settings-name-field input {
   border: var(--border-thin) solid var(--line-strong);
   border-radius: var(--radius-sm);
   outline: 0;
-  background: var(--switch-bg);
+  background: var(--panel-2);
   color: var(--ink);
   font: inherit;
   font-size: var(--text-detail);
@@ -154,7 +154,7 @@ html[dir='rtl'] .language-select .icon {
   padding: 0;
   border: 0;
   border-radius: var(--radius-pill);
-  background: var(--switch-bg);
+  background: var(--panel-2);
   transition:
     transform var(--duration-normal) var(--ease-standard),
     background var(--duration-slow) var(--ease-standard);
@@ -177,14 +177,14 @@ html[dir='rtl'] .language-select .icon {
   width: 24px;
   height: 24px;
   border-radius: var(--radius-round);
-  background: var(--switch-thumb);
+  background: var(--muted);
   transition:
     transform 280ms cubic-bezier(0.2, 0.8, 0.25, 1.2),
     background var(--duration-slow) var(--ease-standard);
 }
 .settings-switch.is-on .switch-thumb {
   transform: translateX(24px);
-  background: var(--switch-on-ink);
+  background: var(--ink-on-acid);
 }
 .settings-note {
   margin: 24px 3px 0;
