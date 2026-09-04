@@ -186,7 +186,7 @@ export function DotsBoxesPage({ setup, playerNames, onExit }: { setup: GameSetup
         <div className="dots-status" role="status" aria-live="polite">
           {status}
         </div>
-        <div className="dots-board" role="group" aria-label={t('dotsBoard')}>
+        <div className={`dots-board turn-${turn.toLowerCase()}`} role="group" aria-label={t('dotsBoard')}>
           {renderBoard({
             edges,
             boxes,

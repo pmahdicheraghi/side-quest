@@ -187,7 +187,7 @@ export function ConnectFourPage({ setup, playerNames, onExit }: { setup: GameSet
         <div className="turn-label" role="status" aria-live="polite">
           {status}
         </div>
-        <div className="connect-board" role="group" aria-label={t('connectBoard')}>
+        <div className={`board-surface connect-board turn-${turn.toLowerCase()}`} role="group" aria-label={t('connectBoard')}>
           {Array.from({ length: CONNECT_COLUMNS }, (_, column) => {
             const targetRow = getDropRow(board, column);
             return (
@@ -206,7 +206,7 @@ export function ConnectFourPage({ setup, playerNames, onExit }: { setup: GameSet
                   const mark = board[index];
                   return (
                     <span
-                      className={`connect-cell ${mark.toLowerCase()} ${winningLine.includes(index) ? 'is-winner' : ''} ${row === targetRow ? 'is-target' : ''}`}
+                      className={`connect-cell ${mark.toLowerCase()} ${winningLine.includes(index) ? 'is-winner' : ''}`}
                       data-index={index}
                       key={row}
                       aria-hidden="true"

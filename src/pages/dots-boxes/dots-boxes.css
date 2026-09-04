@@ -3,40 +3,34 @@
 }
 
 .dots-status {
-  min-height: 16px;
-  color: var(--acid);
+  height: 44px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+  padding-inline: 8px;
+  overflow: hidden;
+  color: var(--game-accent, var(--acid));
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--text-label);
+  line-height: 1.45;
   letter-spacing: 0.06em;
-}
-
-.dots-box-score {
-  width: min(100%, 420px);
-  margin: 8px auto 10px;
-  display: flex;
-  justify-content: space-between;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 9px;
-}
-.dots-box-score span:first-child {
-  color: var(--acid);
-}
-.dots-box-score span:last-child {
-  color: var(--orange);
 }
 
 .dots-board {
   --dots-edge-overhang: 15px;
+  --active-edge: var(--acid);
   width: min(100%, 420px);
   aspect-ratio: 1;
   margin: auto;
-  padding: 8px;
   display: grid;
-  grid-template-columns: 20px 1fr 20px 1fr 20px 1fr 20px 1fr 20px;
-  grid-template-rows: 20px 1fr 20px 1fr 20px 1fr 20px 1fr 20px;
+  grid-template-columns: 20px minmax(0, 1fr) 20px minmax(0, 1fr) 20px minmax(0, 1fr) 20px minmax(0, 1fr) 20px;
+  grid-template-rows: 20px minmax(0, 1fr) 20px minmax(0, 1fr) 20px minmax(0, 1fr) 20px minmax(0, 1fr) 20px;
   align-items: stretch;
   justify-items: stretch;
+}
+
+.dots-board.turn-o {
+  --active-edge: var(--orange);
 }
 
 .dots-dot {
@@ -46,8 +40,9 @@
   justify-self: center;
   position: relative;
   z-index: 3;
-  border-radius: 50%;
-  background: var(--ink);
+  border-radius: var(--radius-round);
+  background: var(--dots-card-bg);
+  box-shadow: 0 0 0 3px var(--game-wash);
 }
 
 .dots-edge {
@@ -56,18 +51,18 @@
   position: relative;
   z-index: 2;
   padding: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
 }
 .dots-edge::before {
   content: '';
   position: absolute;
-  border-radius: 999px;
-  background: var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--game-border);
   transition:
-    background 150ms ease,
-    width 150ms ease,
-    height 150ms ease;
+    background var(--duration-fast) var(--ease-standard),
+    width var(--duration-fast) var(--ease-standard),
+    height var(--duration-fast) var(--ease-standard);
 }
 .dots-edge.horizontal::before {
   height: 3px;
@@ -84,7 +79,7 @@
   transform: translateX(-50%);
 }
 .dots-edge:not(:disabled):focus-visible::before {
-  background: var(--acid);
+  background: var(--active-edge);
 }
 .dots-edge.horizontal:not(:disabled):focus-visible::before {
   height: 5px;
@@ -95,7 +90,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .dots-edge:not(:disabled):hover::before {
-    background: var(--acid);
+    background: var(--active-edge);
   }
 
   .dots-edge.horizontal:not(:disabled):hover::before {
@@ -125,15 +120,17 @@
 }
 
 .dots-box {
-  margin: 3px;
+  min-width: 0;
+  min-height: 0;
   display: grid;
   place-items: center;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   color: transparent;
+  background: transparent;
   font-size: clamp(20px, 7vw, 34px);
   transition:
-    background 180ms ease,
-    color 180ms ease;
+    background var(--duration-normal) var(--ease-standard),
+    color var(--duration-normal) var(--ease-standard);
 }
 .dots-box.owner-x {
   color: var(--acid);
@@ -147,11 +144,7 @@
 @media (max-width: 370px) {
   .dots-board {
     --dots-edge-overhang: 13px;
-    grid-template-columns: 26px 1fr 26px 1fr 26px 1fr 26px;
-    grid-template-rows: 26px 1fr 26px 1fr 26px 1fr 26px;
-    padding: 6px;
-  }
-  .dots-box {
-    margin: 2px;
+    grid-template-columns: 26px minmax(0, 1fr) 26px minmax(0, 1fr) 26px minmax(0, 1fr) 26px minmax(0, 1fr) 26px;
+    grid-template-rows: 26px minmax(0, 1fr) 26px minmax(0, 1fr) 26px minmax(0, 1fr) 26px minmax(0, 1fr) 26px;
   }
 }

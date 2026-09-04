@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import anime from 'animejs';
 import { animateIn, motionEnabled } from '../../app/animation';
 import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
@@ -7,16 +6,16 @@ import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
 import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import { playMoveSound, playPairSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
-import { chooseReversiBotMove, countDiscs, createReversiBoard, getValidMoves, makeMove, type ReversiCell } from './reversi-logic';
-import './reversi.css';
+import { chooseOthelloBotMove, countDiscs, createOthelloBoard, getValidMoves, makeMove, type OthelloCell } from './othello-logic';
+import './othello.css';
 import type { PlayerNames } from '../../app/player-names';
 
-const FLIP_SETTLE_MS = 380;
+const FLIP_SETTLE_MS = 420;
 
-export function ReversiPage({ setup, playerNames, onExit }: { setup: GameSetup; playerNames: PlayerNames; onExit: () => void }) {
+export function OthelloPage({ setup, playerNames, onExit }: { setup: GameSetup; playerNames: PlayerNames; onExit: () => void }) {
   const { language, t } = useI18n();
   const mode = setup.mode;
-  const [board, setBoard] = useState<ReversiCell[]>(createReversiBoard);
+  const [board, setBoard] = useState<OthelloCell[]>(createOthelloBoard);
   const [turn, setTurn] = useState<Player>('X');
   const [roundWinner, setRoundWinner] = useState<Player | 'draw' | null>(null);
   const [flippedDiscs, setFlippedDiscs] = useState<number[]>([]);
@@ -36,20 +35,7 @@ export function ReversiPage({ setup, playerNames, onExit }: { setup: GameSetup; 
 
   const discCounts = useMemo(() => countDiscs(board), [board]);
 
-  useEffect(() => animateIn('.score-strip, .reversi-board-wrap, .tip'), []);
-
-  // Animate flipped discs
-  useEffect(() => {
-    if (!flippedDiscs.length || !motionEnabled()) return;
-    anime({
-      targets: flippedDiscs.map((idx) => `.reversi-cell[data-index="${idx}"] .reversi-disc`).join(', '),
-      scale: [0.65, 1],
-      opacity: [0.4, 1],
-      delay: anime.stagger(50),
-      duration: 320,
-      easing: 'easeOutCubic',
-    });
-  }, [flippedDiscs]);
+  useEffect(() => animateIn('.score-strip, .othello-board-wrap, .tip'), []);
 
   // Cleanup timers on unmount
   useEffect(
@@ -78,7 +64,7 @@ export function ReversiPage({ setup, playerNames, onExit }: { setup: GameSetup; 
     }
   };
 
-  const finishRound = (finalBoard: ReversiCell[]) => {
+  const finishRound = (finalBoard: OthelloCell[]) => {
     const counts = countDiscs(finalBoard);
     const result: Player | 'draw' = counts.X === counts.O ? 'draw' : counts.X > counts.O ? 'X' : 'O';
     setRoundWinner(result);
@@ -93,11 +79,11 @@ export function ReversiPage({ setup, playerNames, onExit }: { setup: GameSetup; 
     }
     if (round >= setup.rounds) {
       const outcome = nextScores.X === nextScores.O ? 'draw' : nextScores.X > nextScores.O ? 'win' : 'loss';
-      recordMatchResult('reversi', outcome, { difficulty: mode === 'bot' ? setup.difficulty : undefined });
+      recordMatchResult('othello', outcome, { difficulty: mode === 'bot' ? setup.difficulty : undefined });
     }
   };
 
-  const handleTurnAfterMove = (nextBoard: ReversiCell[], player: Player) => {
+  const handleTurnAfterMove = (nextBoard: OthelloCell[], player: Player) => {
     const opponent: Player = player === 'X' ? 'O' : 'X';
     const opponentValidMoves = getValidMoves(nextBoard, opponent);
     const playerValidMoves = getValidMoves(nextBoard, player);
@@ -108,7 +94,7 @@ export function ReversiPage({ setup, playerNames, onExit }: { setup: GameSetup; 
     } else if (playerValidMoves.length > 0) {
       // Opponent must pass
       const opponentName = playerName(opponent);
-      setPassMessage(t('reversiPassed', { player: opponentName }));
+      setPassMessage(t('othelloPassed', { player: opponentName }));
       if (passTimeoutRef.current !== null) window.clearTimeout(passTimeoutRef.current);
       passTimeoutRef.current = window.setTimeout(() => {
         passTimeoutRef.current = null;
@@ -153,14 +139,14 @@ export function ReversiPage({ setup, playerNames, onExit }: { setup: GameSetup; 
     if (roundWinner || isSettling || mode !== 'bot' || turn !== 'O') return;
 
     const botTimer = window.setTimeout(() => {
-      const botMove = chooseReversiBotMove(board, setup.difficulty);
+      const botMove = chooseOthelloBotMove(board, setup.difficulty);
       if (botMove !== null) {
         playCell(botMove, 'O', false);
       } else {
         // Bot has no moves
         const humanMoves = getValidMoves(board, 'X');
         if (humanMoves.length > 0) {
-          setPassMessage(t('reversiPassed', { player: playerName('O') }));
+          setPassMessage(t('othelloPassed', { player: playerName('O') }));
           if (passTimeoutRef.current !== null) window.clearTimeout(passTimeoutRef.current);
           passTimeoutRef.current = window.setTimeout(() => {
             passTimeoutRef.current = null;
@@ -189,7 +175,7 @@ export function ReversiPage({ setup, playerNames, onExit }: { setup: GameSetup; 
     clearTimers();
     const nextRound = advanceRound ? round + 1 : round;
     if (advanceRound) setRound(nextRound);
-    setBoard(createReversiBoard());
+    setBoard(createOthelloBoard());
     setTurn(getRoundStarter(nextRound));
     setRoundWinner(null);
     setFlippedDiscs([]);
@@ -212,9 +198,9 @@ export function ReversiPage({ setup, playerNames, onExit }: { setup: GameSetup; 
       : (passMessage ?? t('playerTurn', { player: playerName(turn) }));
 
   return (
-    <main className="shell game-screen reversi-screen theme-reversi">
+    <main className="shell game-screen othello-screen theme-othello">
       <GameHeader
-        title={t('reversi')}
+        title={t('othello')}
         statIcon="grid"
         statLabel={t('roundLabel')}
         statValue={numberFormatter.format(round)}
@@ -231,44 +217,44 @@ export function ReversiPage({ setup, playerNames, onExit }: { setup: GameSetup; 
         inGameUnit={t('discsUnit')}
         turn={turn}
       />
-      <section className="reversi-board-wrap">
+      <section className="othello-board-wrap">
         <div className="turn-label" role="status" aria-live="polite">
           {status}
         </div>
-        <div className="reversi-board" role="group" aria-label={t('reversiBoard')}>
+        <div className={`board-surface othello-board turn-${turn.toLowerCase()}`} role="group" aria-label={t('othelloBoard')}>
           {board.map((cell, index) => {
             const isValid = validMoves.includes(index);
             const ariaLabel = cell
-              ? t('reversiCellMarked', {
+              ? t('othelloCellMarked', {
                   cell: numberFormatter.format(index + 1),
                   player: playerName(cell),
                 })
               : isValid
-                ? t('reversiCellValid', {
+                ? t('othelloCellValid', {
                     cell: numberFormatter.format(index + 1),
                     player: playerName(turn),
                   })
-                : t('reversiCellEmpty', { cell: numberFormatter.format(index + 1) });
+                : t('othelloCellEmpty', { cell: numberFormatter.format(index + 1) });
 
             return (
               <button
                 key={index}
                 type="button"
-                className={`reversi-cell ${cell ? (cell === 'X' ? 'x' : 'o') : ''} ${isValid ? 'is-valid' : ''}`}
+                className={`othello-cell ${cell ? (cell === 'X' ? 'x' : 'o') : ''} ${isValid ? 'is-valid' : ''}`}
                 data-index={index}
                 disabled={!isValid || Boolean(roundWinner) || isSettling}
                 onClick={() => playCell(index)}
                 aria-label={ariaLabel}
               >
-                {cell && <span className="reversi-disc" />}
-                {!cell && isValid && <span className="reversi-valid-dot" />}
+                {cell && <span key={cell} className={`othello-disc ${flippedDiscs.includes(index) ? 'is-flipping' : ''}`} />}
+                {!cell && isValid && <span className="othello-valid-dot" />}
               </button>
             );
           })}
         </div>
       </section>
-      <Tip>{t('reversiTip')}</Tip>
-      {matchComplete && <MatchResultToast message={status} gameTitle={t('reversi')} onExit={onExit} />}
+      <Tip>{t('othelloTip')}</Tip>
+      {matchComplete && <MatchResultToast message={status} gameTitle={t('othello')} onExit={onExit} />}
     </main>
   );
 }

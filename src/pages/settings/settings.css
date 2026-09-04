@@ -1,10 +1,3 @@
-.settings-topbar {
-  justify-content: flex-start;
-  gap: 14px;
-}
-.topbar-spacer {
-  flex: 1;
-}
 .settings-intro {
   margin-top: 58px;
 }
@@ -16,7 +9,7 @@
 }
 .settings-intro p {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--text-body-sm);
 }
 .settings-list {
   display: grid;
@@ -30,8 +23,8 @@
   gap: 16px;
   min-height: 72px;
   padding: 13px 14px 13px 16px;
-  border: 1px solid var(--line);
-  border-radius: 11px;
+  border: var(--border-thin) solid var(--line);
+  border-radius: var(--radius-md);
   background: var(--surface-subtle);
 }
 .settings-copy {
@@ -45,7 +38,7 @@
 .settings-copy span,
 .settings-note {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--text-detail);
   line-height: 1.4;
 }
 .settings-name-field {
@@ -53,15 +46,15 @@
   align-items: center;
   flex: 0 1 178px;
   min-width: 0;
-  border: 1px solid var(--line-strong);
-  border-radius: 9px;
+  border: var(--border-thin) solid var(--line-strong);
+  border-radius: var(--radius-sm);
   background: var(--switch-bg);
-  transition: border-color 160ms ease;
+  transition: border-color var(--duration-normal) var(--ease-standard);
 }
 .settings-name-field:focus-within {
   border-color: var(--acid);
-  outline: 2px solid var(--acid);
-  outline-offset: 1px;
+  outline: var(--focus-ring-width) solid var(--acid);
+  outline-offset: var(--border-thin);
 }
 .settings-name-field b {
   display: grid;
@@ -87,7 +80,7 @@
   background: transparent;
   color: var(--ink);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--text-control);
 }
 .settings-name-field input::placeholder {
   color: var(--muted);
@@ -118,13 +111,13 @@ html[dir='rtl'] .settings-name-field input {
   min-height: 38px;
   appearance: none;
   padding: 8px 34px 8px 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: 9px;
+  border: var(--border-thin) solid var(--line-strong);
+  border-radius: var(--radius-sm);
   outline: 0;
   background: var(--switch-bg);
   color: var(--ink);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--text-detail);
   font-weight: 600;
   cursor: pointer;
 }
@@ -133,8 +126,8 @@ html[dir='rtl'] .settings-name-field input {
 }
 .language-select select:focus-visible {
   border-color: var(--acid);
-  outline: 2px solid var(--acid);
-  outline-offset: 1px;
+  outline: var(--focus-ring-width) solid var(--acid);
+  outline-offset: var(--border-thin);
 }
 .language-select .icon {
   position: absolute;
@@ -159,16 +152,14 @@ html[dir='rtl'] .language-select .icon {
   width: 56px;
   height: 32px;
   padding: 0;
-  border: 4px solid var(--switch-bg);
-  border-radius: 99px;
+  border: 0;
+  border-radius: var(--radius-pill);
   background: var(--switch-bg);
   transition:
-    transform 0.2s ease,
-    background 0.25s ease,
-    border-color 0.25s ease;
+    transform var(--duration-normal) var(--ease-standard),
+    background var(--duration-slow) var(--ease-standard);
 }
 .settings-switch.is-on {
-  border-color: var(--acid);
   background: var(--acid);
 }
 .settings-switch:hover {
@@ -179,31 +170,21 @@ html[dir='rtl'] .language-select .icon {
 }
 .switch-thumb {
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: 4px;
+  left: 4px;
   display: grid;
   place-items: center;
   width: 24px;
   height: 24px;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background: var(--switch-thumb);
   transition:
-    transform 0.28s cubic-bezier(0.2, 0.8, 0.25, 1.2),
-    background 0.25s ease;
-}
-.switch-thumb::after {
-  color: var(--switch-thumb-ink);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
+    transform 280ms cubic-bezier(0.2, 0.8, 0.25, 1.2),
+    background var(--duration-slow) var(--ease-standard);
 }
 .settings-switch.is-on .switch-thumb {
   transform: translateX(24px);
   background: var(--switch-on-ink);
-}
-.settings-switch.is-on .switch-thumb::after {
-  color: var(--acid);
-  font-size: 12px;
 }
 .settings-note {
   margin: 24px 3px 0;
@@ -212,7 +193,7 @@ html[dir='rtl'] .language-select .icon {
   margin: 10px 3px 0;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--text-caption);
   letter-spacing: 0.06em;
 }
 .settings-back {
@@ -227,15 +208,4 @@ html[dir='rtl'] .language-select .icon {
 }
 html[dir='rtl'] .settings-back .icon-arrow {
   transform: none;
-}
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }

@@ -147,19 +147,21 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
             : t('winsRound', { player: playerName(winner!) })
           : t('pressStart');
   const label = (player: Player) =>
-    reactions[player]
-      ? formatReaction(reactions[player])
-      : phase === 'waiting'
-        ? t('waitForGreen')
-        : phase === 'go'
-          ? t('tapNowShort')
-          : phase === 'result' && falseStart
-            ? falseStart === player
-              ? t('tooEarly')
-              : t('wins')
-            : phase === 'result'
-              ? t('noTap')
-              : t('ready');
+    phase === 'waiting'
+      ? t('waitForGreen')
+      : phase === 'go'
+        ? t('tapNowShort')
+        : phase === 'result' && falseStart
+          ? falseStart === player
+            ? t('tooEarly')
+            : t('wins')
+          : phase === 'result'
+            ? winner === player
+              ? t('wins')
+              : t('noTap')
+            : t('ready');
+  const actionLabel = (player: Player) =>
+    reactions[player] ? formatReaction(reactions[player]) : phase === 'waiting' ? t('ready') : phase === 'go' ? t('tap') : label(player);
   const running = phase === 'waiting' || phase === 'go';
 
   return (
@@ -172,62 +174,50 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
         statSuffix={<small>/ {new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(setup.rounds)}</small>}
         onExit={onExit}
       />
-      <ScoreStrip
-        leftLabel={playerNames.X}
-        leftMark="✦"
-        rightLabel={playerNames.O}
-        rightMark="✦"
-        scores={scores}
-        inGameScores={{
-          X: reactions.X ? `${new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(reactions.X)}ms` : '—',
-          O: reactions.O ? `${new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(reactions.O)}ms` : '—',
-        }}
-      />
-      <section className={`reaction-arena phase-${phase}`}>
-        <div className={`signal-orb ${phase === 'go' ? 'signal-go' : ''}`} aria-hidden="true">
-          <span>{phase === 'go' ? t('go') : '✦'}</span>
+      <ScoreStrip leftLabel={playerNames.X} leftMark="✦" rightLabel={playerNames.O} rightMark="✦" scores={scores} />
+      <section className={`reaction-arena phase-${phase}`} aria-label={t('playerTapButtons')}>
+        <div className="reaction-signal">
+          <div className={`signal-orb ${phase === 'go' ? 'signal-go' : ''}`} aria-hidden="true">
+            <span>{phase === 'go' ? t('go') : '✦'}</span>
+          </div>
+          <div className="reaction-status" role="status" aria-live="assertive">
+            {status}
+          </div>
         </div>
-        <div className="reaction-status" role="status" aria-live="assertive">
-          {status}
+        <div className="reaction-player-zones">
+          <button
+            type="button"
+            className={`reaction-player player-one ${winner === 'X' ? 'is-winner' : ''} ${falseStart === 'X' ? 'is-false-start' : ''}`}
+            onPointerDown={(event) => {
+              event.preventDefault();
+              tap('X');
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') tap('X');
+            }}
+            disabled={!running}
+          >
+            <span>{playerNames.X}</span>
+            <strong>{actionLabel('X')}</strong>
+            <small>{label('X')}</small>
+          </button>
+          <button
+            type="button"
+            className={`reaction-player player-two ${mode === 'bot' ? 'is-bot' : ''} ${winner === 'O' ? 'is-winner' : ''} ${falseStart === 'O' ? 'is-false-start' : ''}`}
+            onPointerDown={(event) => {
+              event.preventDefault();
+              tap('O');
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') tap('O');
+            }}
+            disabled={!running || mode === 'bot'}
+          >
+            <span>{playerNames.O}</span>
+            <strong>{actionLabel('O')}</strong>
+            <small>{label('O')}</small>
+          </button>
         </div>
-        <div className="reaction-times" aria-label={t('reactionTimes')}>
-          <span>{reactions.X ? formatReaction(reactions.X) : '—'}</span>
-          <span>{reactions.O ? formatReaction(reactions.O) : '—'}</span>
-        </div>
-      </section>
-      <section className="reaction-buttons" aria-label={t('playerTapButtons')}>
-        <button
-          type="button"
-          className="reaction-player player-one"
-          onPointerDown={(event) => {
-            event.preventDefault();
-            tap('X');
-          }}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') tap('X');
-          }}
-          disabled={!running}
-        >
-          <span>{playerNames.X}</span>
-          <strong>{t('tap')}</strong>
-          <small>{label('X')}</small>
-        </button>
-        <button
-          type="button"
-          className="reaction-player player-two"
-          onPointerDown={(event) => {
-            event.preventDefault();
-            tap('O');
-          }}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') tap('O');
-          }}
-          disabled={!running || mode === 'bot'}
-        >
-          <span>{playerNames.O}</span>
-          <strong>{t('tap')}</strong>
-          <small>{label('O')}</small>
-        </button>
       </section>
       <Tip>{t('reactionTip')}</Tip>
       {matchComplete && <MatchResultToast message={status} gameTitle={t('reactionDuel')} onExit={onExit} />}

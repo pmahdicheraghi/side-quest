@@ -3,15 +3,12 @@
 }
 
 .connect-board {
+  --board-surface-bg: var(--connect-board-frame);
   width: min(100%, 420px);
   margin: auto;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 4px;
-  padding: 9px;
-  border-radius: 16px;
-  background: var(--connect-board-bg);
-  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .connect-column {
@@ -20,7 +17,7 @@
   flex-direction: column;
   gap: 4px;
   padding: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: transparent;
 }
 
@@ -34,14 +31,15 @@
   position: relative;
   display: block;
   overflow: hidden;
-  border-radius: 50%;
-  background: var(--bg);
+  border: var(--border-thin) solid var(--game-border);
+  border-radius: var(--radius-round);
+  background: var(--connect-board-bg);
 }
 
 .connect-disc {
   position: absolute;
   inset: 3px;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
 }
 
 .connect-cell.x .connect-disc {
@@ -52,39 +50,14 @@
   background: var(--orange);
 }
 
-.connect-cell.is-target::after {
-  content: '';
-  position: absolute;
-  inset: 5px;
-  border: 2px dashed var(--acid);
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 150ms ease;
-}
-
-.connect-column:focus-visible .connect-cell.is-target::after {
-  opacity: 0.42;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .connect-column:not(:disabled):hover {
-    background: var(--surface-faint);
-  }
-
-  .connect-column:not(:disabled):hover .connect-cell.is-target::after {
-    opacity: 0.42;
-  }
-}
-
 .connect-cell.is-winner .connect-disc {
-  outline: 3px solid var(--ink);
-  outline-offset: -3px;
+  outline: var(--border-heavy) solid var(--ink);
+  outline-offset: calc(var(--border-heavy) * -1);
 }
 
 @media (max-width: 370px) {
   .connect-board {
     gap: 3px;
-    padding: 7px;
   }
 
   .connect-column {

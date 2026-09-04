@@ -10,7 +10,7 @@ import { MemoryMatchPage } from '../pages/memory-match/MemoryMatchPage';
 import { ReactionDuelPage } from '../pages/reaction-duel/ReactionDuelPage';
 import { ConnectFourPage } from '../pages/connect-four/ConnectFourPage';
 import { DotsBoxesPage } from '../pages/dots-boxes/DotsBoxesPage';
-import { ReversiPage } from '../pages/reversi/ReversiPage';
+import { OthelloPage } from '../pages/othello/OthelloPage';
 import { GameSetupDialog } from '../components/GameSetupDialog';
 import { StatsPage } from '../components/StatsDialog';
 import { translate, useI18n, type Language } from './i18n';
@@ -159,7 +159,7 @@ export function ReactApp(): ReactElement {
       nextView === 'reaction' ||
       nextView === 'connect' ||
       nextView === 'dots' ||
-      nextView === 'reversi'
+      nextView === 'othello'
     ) {
       window.history.pushState(historyStateFor('setup'), '');
       setPendingGame(nextView);
@@ -232,7 +232,7 @@ export function ReactApp(): ReactElement {
       {view === 'reaction' && <ReactionDuelPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {view === 'connect' && <ConnectFourPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {view === 'dots' && <DotsBoxesPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
-      {view === 'reversi' && <ReversiPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
+      {view === 'othello' && <OthelloPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {pendingGame && (
         <GameSetupDialog
           gameTitle={gameTitle(pendingGame, language)}
@@ -260,6 +260,7 @@ function historyStateFor(view: HistoryView): Record<string, unknown> {
 function viewFromHistory(state: unknown): HistoryView | null {
   if (!state || typeof state !== 'object') return null;
   const value = (state as Record<string, unknown>)[HISTORY_VIEW_KEY];
+  if (value === 'reversi') return 'othello';
   return value === 'menu' ||
     value === 'settings' ||
     value === 'tic' ||
@@ -267,7 +268,7 @@ function viewFromHistory(state: unknown): HistoryView | null {
     value === 'reaction' ||
     value === 'connect' ||
     value === 'dots' ||
-    value === 'reversi' ||
+    value === 'othello' ||
     value === 'setup' ||
     value === 'stats'
     ? (value as HistoryView)
@@ -280,7 +281,7 @@ function gameTitle(view: Exclude<View, 'menu' | 'settings' | 'stats'>, language:
   if (view === 'reaction') return translate(language, 'reactionDuel');
   if (view === 'connect') return translate(language, 'connectFour');
   if (view === 'dots') return translate(language, 'dotsBoxes');
-  return translate(language, 'reversi');
+  return translate(language, 'othello');
 }
 
 function MenuPage({
@@ -517,14 +518,14 @@ function MenuPage({
           onSelect={onNavigate}
         />
         <GameCard
-          view="reversi"
+          view="othello"
           number={t('territory')}
-          title={t('reversi')}
-          description={t('reversiDescription')}
-          cardClass="reversi-card"
+          title={t('othello')}
+          description={t('othelloDescription')}
+          cardClass="othello-card"
           visual={Array.from({ length: 24 }, (_, index) => (
             <span
-              className={[7, 8, 14].includes(index) ? 'reversi-dot-dark' : [9, 15, 16].includes(index) ? 'reversi-dot-light' : ''}
+              className={[7, 8, 14].includes(index) ? 'othello-dot-dark' : [9, 15, 16].includes(index) ? 'othello-dot-light' : ''}
               key={index}
             />
           ))}
@@ -586,7 +587,7 @@ function GameCard({
             ? 'connect-visual'
             : view === 'dots'
               ? 'dots-visual'
-              : 'reversi-visual';
+              : 'othello-visual';
 
   return (
     <button

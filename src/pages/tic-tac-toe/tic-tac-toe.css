@@ -1,14 +1,6 @@
 .tic-board-wrap {
   text-align: center;
 }
-.turn-label {
-  color: var(--acid);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  margin-bottom: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
 .tic-board {
   width: min(100%, 350px);
   height: min(350px, calc(100vw - 40px));
@@ -24,15 +16,15 @@
   min-height: 0;
   position: relative;
   background: var(--panel);
-  border-radius: 11px;
+  border-radius: var(--radius-md);
   font-family: var(--font-mono);
   font-size: clamp(55px, 17vw, 79px);
   line-height: 1;
   color: var(--ink);
   transition:
-    background 0.2s,
-    color 0.2s,
-    transform 0.15s;
+    background var(--duration-normal) var(--ease-standard),
+    color var(--duration-normal) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
 }
 @media (hover: hover) and (pointer: fine) {
   .tic-cell:not(:disabled):hover {
@@ -48,18 +40,18 @@
 }
 .tic-cell.is-expiring:not(.is-winner) {
   opacity: 0.58;
-  outline: 1px solid currentColor;
-  outline-offset: -1px;
+  outline: var(--border-thin) solid currentColor;
+  outline-offset: calc(var(--border-thin) * -1);
 }
 .tic-cell.x.is-winner {
-  color: var(--memory-front-ink);
-  background: var(--acid);
-  outline: 2px solid var(--acid);
-  outline-offset: -2px;
+  color: var(--game-accent-ink);
+  background: var(--game-accent);
+  outline: var(--border-strong) solid var(--game-accent);
+  outline-offset: calc(var(--border-strong) * -1);
 }
 .tic-cell.o.is-winner {
-  color: var(--memory-front-ink);
+  color: var(--ink-on-orange);
   background: var(--orange);
-  outline: 2px solid var(--orange);
-  outline-offset: -2px;
+  outline: var(--border-strong) solid var(--orange);
+  outline-offset: calc(var(--border-strong) * -1);
 }

@@ -1,101 +1,236 @@
 .reaction-arena {
-  min-height: 230px;
-  border-radius: 15px;
+  width: min(100%, 420px);
+  min-height: 310px;
+  position: relative;
+  overflow: hidden;
+  margin: auto;
+  border: var(--border-thin) solid var(--game-border);
+  border-radius: var(--radius-lg);
+  background: var(--reaction-arena-end);
+  box-shadow: var(--shadow-inset-highlight);
+  transition:
+    background var(--duration-slow) var(--ease-standard),
+    border-color var(--duration-slow) var(--ease-standard);
+}
+
+.reaction-arena.phase-go {
+  border-color: var(--reaction-card-bg);
+  background: var(--reaction-go-end);
+}
+
+.reaction-player-zones {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.reaction-player {
+  min-width: 0;
+  padding: 194px 14px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 17px;
-  margin: auto;
-  width: min(100%, 350px);
-  background: linear-gradient(160deg, var(--reaction-arena-start), var(--reaction-arena-end));
-  transition: background 0.25s;
+  justify-content: flex-end;
+  gap: 5px;
+  border-radius: 0;
+  background: var(--game-wash);
+  color: var(--reaction-card-bg);
+  transition:
+    background var(--duration-normal) var(--ease-standard),
+    filter var(--duration-normal) var(--ease-standard),
+    opacity var(--duration-normal) var(--ease-standard),
+    transform var(--duration-normal) var(--ease-standard);
 }
-.reaction-arena.phase-go {
-  background: linear-gradient(160deg, var(--reaction-go-start), var(--reaction-go-end));
+
+.reaction-player.player-two {
+  border-inline-start: var(--border-thin) solid var(--line);
+  background: var(--reaction-coral-wash);
+  color: var(--reaction-coral);
 }
+
+.reaction-player:focus-visible {
+  outline-offset: -4px;
+}
+
+.reaction-player:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.reaction-player:disabled {
+  cursor: not-allowed;
+}
+
+.reaction-player.is-bot:disabled {
+  cursor: default;
+  opacity: 0.82;
+}
+
+.reaction-player.is-winner {
+  opacity: 1;
+  background: var(--game-tint);
+  box-shadow: inset 0 -4px 0 currentColor;
+}
+
+.reaction-player.is-bot.is-winner {
+  opacity: 1;
+}
+
+.reaction-player.player-two.is-winner {
+  background: var(--reaction-coral-wash);
+}
+
+.reaction-player.is-false-start {
+  opacity: 0.3;
+  filter: saturate(0.35);
+}
+
+.reaction-player span,
+.reaction-player small {
+  max-width: 100%;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reaction-player span {
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.reaction-player strong {
+  max-width: 100%;
+  font-size: clamp(17px, 5vw, 23px);
+  line-height: 1.15;
+  letter-spacing: -0.045em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.reaction-player small {
+  color: var(--muted);
+  font-size: var(--text-micro);
+  letter-spacing: 0.06em;
+}
+
+.reaction-signal {
+  width: 100%;
+  position: absolute;
+  z-index: 2;
+  top: 34px;
+  left: 0;
+  display: grid;
+  justify-items: center;
+  gap: 29px;
+  padding-inline: 18px;
+  pointer-events: none;
+}
+
 .signal-orb {
-  width: 108px;
-  height: 108px;
+  width: 112px;
+  height: 112px;
   display: grid;
   place-items: center;
-  border: 2px solid var(--acid-border);
-  border-radius: 50%;
-  color: var(--acid);
-  background: var(--acid-wash);
+  border: var(--border-strong) solid var(--game-border);
+  border-radius: var(--radius-round);
+  background: var(--game-wash);
+  color: var(--reaction-card-bg);
+  box-shadow:
+    0 0 0 13px var(--reaction-coral-wash),
+    0 0 0 28px var(--game-wash);
   font-family: var(--font-mono);
-  font-size: 15px;
+  font-size: 18px;
   transition:
-    background 0.2s,
-    border-color 0.2s;
+    background var(--duration-normal) var(--ease-standard),
+    border-color var(--duration-normal) var(--ease-standard),
+    box-shadow var(--duration-normal) var(--ease-standard);
 }
+
+.phase-waiting .signal-orb {
+  animation: reaction-pulse 1.35s ease-in-out infinite;
+}
+
 .signal-orb.signal-go {
+  border: var(--border-heavy) solid var(--reaction-card-bg);
+  background: var(--reaction-light);
   color: var(--reaction-go-ink);
-  background: var(--acid);
-  border: 3px solid var(--acid);
+  box-shadow:
+    0 0 0 14px var(--reaction-light-wash),
+    0 0 0 30px var(--reaction-coral-wash);
   font-size: 20px;
   font-weight: 700;
 }
+
 .reaction-status {
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.phase-go .reaction-status {
-  color: var(--acid);
-}
-.reaction-times {
-  display: flex;
-  gap: 50px;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 10px;
-}
-.reaction-times span:first-child {
-  color: var(--acid);
-}
-.reaction-times span:last-child {
-  color: var(--orange);
-}
-.reaction-buttons {
-  margin: auto;
-  width: min(100%, 350px);
+  min-height: 34px;
+  max-width: 280px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 12px;
-}
-.reaction-player {
-  min-height: 82px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border-radius: 10px;
-  color: var(--reaction-player-one-ink);
-  background: var(--acid);
-}
-.reaction-player.player-two {
-  background: var(--orange);
-  color: var(--reaction-player-two-ink);
-}
-.reaction-player:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-.reaction-player span,
-.reaction-player small {
+  place-items: center;
+  color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
 }
-.reaction-player strong {
-  font-size: 22px;
-  letter-spacing: -0.06em;
+
+.phase-go .reaction-status {
+  color: var(--reaction-card-bg);
 }
-.reaction-player small {
-  opacity: 0.68;
+
+.reaction-screen .score-mark.x-label,
+.reaction-screen .score-player-x.is-leading strong {
+  color: var(--reaction-card-bg);
+}
+
+.reaction-screen .score-mark.o-label,
+.reaction-screen .score-player-o.is-leading strong {
+  color: var(--reaction-coral);
+}
+
+.reaction-screen .score-mark.x-label.is-active {
+  border-color: var(--game-border);
+}
+
+.reaction-screen .score-mark.o-label.is-active {
+  border-color: var(--reaction-coral-border);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .reaction-player:not(:disabled):hover {
+    filter: brightness(1.12);
+  }
+}
+
+@keyframes reaction-pulse {
+  50% {
+    box-shadow:
+      0 0 0 18px var(--reaction-coral-wash),
+      0 0 0 36px var(--game-wash);
+  }
+}
+
+@media (max-width: 370px) {
+  .reaction-arena {
+    min-height: 286px;
+  }
+
+  .reaction-signal {
+    top: 30px;
+    gap: 24px;
+  }
+
+  .signal-orb {
+    width: 102px;
+    height: 102px;
+  }
+
+  .reaction-player {
+    padding: 177px 10px 16px;
+  }
 }

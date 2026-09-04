@@ -20,8 +20,8 @@ function gameTitle(key: GameKey, t: ReturnType<typeof useI18n>['t']): string {
       return t('connectFour');
     case 'dots':
       return t('dotsBoxes');
-    case 'reversi':
-      return t('reversi');
+    case 'othello':
+      return t('othello');
   }
 }
 
@@ -37,7 +37,7 @@ function gameIcon(key: GameKey): string {
       return 'grid';
     case 'dots':
       return 'grid';
-    case 'reversi':
+    case 'othello':
       return 'grid';
   }
 }
@@ -68,7 +68,7 @@ export function StatsPage({ onBack }: { onBack: () => void }): ReactElement {
 
   return (
     <main className="shell stats-screen">
-      <header className="topbar settings-topbar">
+      <header className="topbar subpage-topbar">
         <button
           type="button"
           className="icon-btn"

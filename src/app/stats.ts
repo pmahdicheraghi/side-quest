@@ -2,7 +2,7 @@ import type { GameDifficulty, View } from './types';
 
 export type GameKey = Exclude<View, 'menu' | 'settings' | 'stats'>;
 
-export const GAME_KEYS: readonly GameKey[] = ['tic', 'memory', 'reaction', 'connect', 'dots', 'reversi'] as const;
+export const GAME_KEYS: readonly GameKey[] = ['tic', 'memory', 'reaction', 'connect', 'dots', 'othello'] as const;
 
 export interface GameStats {
   played: number;
@@ -16,6 +16,8 @@ export interface GameStats {
 }
 
 export type AllStats = Record<GameKey, GameStats>;
+
+type StoredStats = Partial<AllStats> & { reversi?: GameStats };
 
 const STATS_STORAGE_KEY = 'side-quest-stats';
 
@@ -38,7 +40,7 @@ export function createDefaultAllStats(): AllStats {
     reaction: createDefaultGameStats(),
     connect: createDefaultGameStats(),
     dots: createDefaultGameStats(),
-    reversi: createDefaultGameStats(),
+    othello: createDefaultGameStats(),
   };
 }
 
@@ -46,11 +48,11 @@ export function loadStats(): AllStats {
   try {
     const raw = localStorage.getItem(STATS_STORAGE_KEY);
     if (!raw) return createDefaultAllStats();
-    const parsed = JSON.parse(raw) as Partial<AllStats>;
+    const parsed = JSON.parse(raw) as StoredStats;
     const result = createDefaultAllStats();
     for (const key of GAME_KEYS) {
-      if (parsed[key] && typeof parsed[key] === 'object') {
-        const item = parsed[key];
+      const item = parsed[key] ?? (key === 'othello' ? parsed.reversi : undefined);
+      if (item && typeof item === 'object') {
         result[key] = {
           played: Number(item.played) || 0,
           wins: Number(item.wins) || 0,

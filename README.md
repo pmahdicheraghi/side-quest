@@ -74,7 +74,7 @@ Every game supports bot and local two-player modes. Status changes are announced
 
 Selecting a game opens a setup dialog for choosing Easy, Normal, or Hard bot difficulty and a 1, 3, or 5-round match. The round limit applies to both bot and local two-player play; difficulty only affects the bot.
 
-Open Settings from the menu to control animations, the Side Quest soundtrack, haptic feedback, and high-contrast colors. Preferences are stored locally in the browser and applied immediately. Music starts after your first interaction to comply with browser autoplay rules and is cached after its first playback for later offline sessions.
+Open Settings from the menu to control animations, music, sound effects, and haptic feedback. Preferences are stored locally in the browser and applied immediately. Music starts after your first interaction to comply with browser autoplay rules and is cached after its first playback for later offline sessions.
 
 The interface supports English and Persian. Choose the language in Settings; the selection is saved locally, and Persian automatically enables the right-to-left layout, Persian number formatting, and the bundled local Vazir font.
 
@@ -91,10 +91,11 @@ src/
     reaction-duel/      Reaction Duel state, bot, and UI
     connect-four/       Connect Four rules, minimax bot, and UI
     dots-boxes/         Dots & Boxes rules, bot tactics, and board UI
-    reversi/            Reversi rules, minimax bot, and board UI
+    othello/            Othello rules, minimax bot, and board UI
     settings/           preferences screen and toggle controls
   styles/
-    global.css          tokens, typography, menu, shared layout, and accessibility
+    design-system.css   shared color, shape, border, type, elevation, and motion tokens
+    global.css          reset, typography, menu, shared layout, and accessibility
     components.css      small shared component rules
   main.tsx              React/Vite entry point
 public/
@@ -108,3 +109,14 @@ scripts/                deployment scripts used by CI
 ```
 
 Each game is a self-contained React component with local state and effects for timers, bot turns, haptics, and motion. The app switches screens through typed React view state in `src/app/react-app.tsx`.
+
+## Design system
+
+`src/styles/design-system.css` is the source of truth for reusable visual decisions. Shared UI decisions use its semantic tokens for colors, corner radii, border widths, shadows, gradients, type sizes, and transition timings; game-mechanic visuals may keep calibrated component-local measurements.
+
+- Small controls use `--radius-sm`, surfaces and board cells use `--radius-md`, feature cards use `--radius-lg`, and dialogs use `--radius-xl`. Pills and circles have dedicated tokens.
+- Structural borders use the thin, strong, and heavy border tokens. Focus rings use the shared focus tokens.
+- Interactive controls and structural panels stay flat. Gradients are reserved for decorative and data-display surfaces and are defined centrally.
+- Shared motion uses the duration and easing tokens and still respects the existing reduced-motion behavior.
+- Grid-based games use the shared `.board-surface` frame and provide only their game-specific surface color and internal geometry.
+- Measurements dictated by game mechanics—board gaps, disc insets, hit areas, and calibrated animation sequences—remain local to that game.

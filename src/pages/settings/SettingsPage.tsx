@@ -35,7 +35,7 @@ export function SettingsPage({
 
   return (
     <main className="shell settings-screen">
-      <header className="topbar settings-topbar">
+      <header className="topbar subpage-topbar">
         <button
           type="button"
           className="icon-btn"

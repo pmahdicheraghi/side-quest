@@ -1,9 +1,9 @@
 import type { GameDifficulty, Player } from '../../app/types';
 
-export const REVERSI_SIZE = 8;
-export const REVERSI_CELL_COUNT = 64;
+export const OTHELLO_SIZE = 8;
+export const OTHELLO_CELL_COUNT = 64;
 
-export type ReversiCell = Player | null;
+export type OthelloCell = Player | null;
 
 const DIRECTIONS: readonly [number, number][] = [
   [-1, -1],
@@ -16,26 +16,26 @@ const DIRECTIONS: readonly [number, number][] = [
   [1, 1],
 ];
 
-export function createReversiBoard(): ReversiCell[] {
-  const board: ReversiCell[] = Array.from({ length: REVERSI_CELL_COUNT }, () => null);
+export function createOthelloBoard(): OthelloCell[] {
+  const board: OthelloCell[] = Array.from({ length: OTHELLO_CELL_COUNT }, () => null);
   // Standard opening: Row 3 Col 3 = O, Row 3 Col 4 = X, Row 4 Col 3 = X, Row 4 Col 4 = O
-  board[3 * REVERSI_SIZE + 3] = 'O';
-  board[3 * REVERSI_SIZE + 4] = 'X';
-  board[4 * REVERSI_SIZE + 3] = 'X';
-  board[4 * REVERSI_SIZE + 4] = 'O';
+  board[3 * OTHELLO_SIZE + 3] = 'O';
+  board[3 * OTHELLO_SIZE + 4] = 'X';
+  board[4 * OTHELLO_SIZE + 3] = 'X';
+  board[4 * OTHELLO_SIZE + 4] = 'O';
   return board;
 }
 
 export function indexToCoord(index: number): [row: number, col: number] {
-  return [Math.floor(index / REVERSI_SIZE), index % REVERSI_SIZE];
+  return [Math.floor(index / OTHELLO_SIZE), index % OTHELLO_SIZE];
 }
 
 export function coordToIndex(row: number, col: number): number {
-  return row * REVERSI_SIZE + col;
+  return row * OTHELLO_SIZE + col;
 }
 
-export function getFlipsForMove(board: readonly ReversiCell[], index: number, player: Player): number[] {
-  if (index < 0 || index >= REVERSI_CELL_COUNT || board[index] !== null) {
+export function getFlipsForMove(board: readonly OthelloCell[], index: number, player: Player): number[] {
+  if (index < 0 || index >= OTHELLO_CELL_COUNT || board[index] !== null) {
     return [];
   }
 
@@ -48,7 +48,7 @@ export function getFlipsForMove(board: readonly ReversiCell[], index: number, pl
     let c = startCol + dc;
     const directionFlips: number[] = [];
 
-    while (r >= 0 && r < REVERSI_SIZE && c >= 0 && c < REVERSI_SIZE) {
+    while (r >= 0 && r < OTHELLO_SIZE && c >= 0 && c < OTHELLO_SIZE) {
       const currentIndex = coordToIndex(r, c);
       const currentCell = board[currentIndex];
 
@@ -72,13 +72,13 @@ export function getFlipsForMove(board: readonly ReversiCell[], index: number, pl
   return totalFlips;
 }
 
-export function isValidMove(board: readonly ReversiCell[], index: number, player: Player): boolean {
+export function isValidMove(board: readonly OthelloCell[], index: number, player: Player): boolean {
   return getFlipsForMove(board, index, player).length > 0;
 }
 
-export function getValidMoves(board: readonly ReversiCell[], player: Player): number[] {
+export function getValidMoves(board: readonly OthelloCell[], player: Player): number[] {
   const validMoves: number[] = [];
-  for (let i = 0; i < REVERSI_CELL_COUNT; i++) {
+  for (let i = 0; i < OTHELLO_CELL_COUNT; i++) {
     if (board[i] === null && isValidMove(board, i, player)) {
       validMoves.push(i);
     }
@@ -87,11 +87,11 @@ export function getValidMoves(board: readonly ReversiCell[], player: Player): nu
 }
 
 export interface MoveResult {
-  board: ReversiCell[];
+  board: OthelloCell[];
   flippedIndices: number[];
 }
 
-export function makeMove(board: readonly ReversiCell[], index: number, player: Player): MoveResult | null {
+export function makeMove(board: readonly OthelloCell[], index: number, player: Player): MoveResult | null {
   const flippedIndices = getFlipsForMove(board, index, player);
   if (flippedIndices.length === 0) return null;
 
@@ -104,21 +104,21 @@ export function makeMove(board: readonly ReversiCell[], index: number, player: P
   return { board: nextBoard, flippedIndices };
 }
 
-export function countDiscs(board: readonly ReversiCell[]): Record<Player, number> {
+export function countDiscs(board: readonly OthelloCell[]): Record<Player, number> {
   let x = 0;
   let o = 0;
-  for (let i = 0; i < REVERSI_CELL_COUNT; i++) {
+  for (let i = 0; i < OTHELLO_CELL_COUNT; i++) {
     if (board[i] === 'X') x++;
     else if (board[i] === 'O') o++;
   }
   return { X: x, O: o };
 }
 
-export function isBoardFull(board: readonly ReversiCell[]): boolean {
+export function isBoardFull(board: readonly OthelloCell[]): boolean {
   return board.every((cell) => cell !== null);
 }
 
-export function getReversiResult(board: readonly ReversiCell[]): Player | 'draw' | null {
+export function getOthelloResult(board: readonly OthelloCell[]): Player | 'draw' | null {
   const hasMovesX = getValidMoves(board, 'X').length > 0;
   const hasMovesO = getValidMoves(board, 'O').length > 0;
 
@@ -139,7 +139,7 @@ const POSITION_WEIGHTS: readonly number[] = [
 
 const CORNERS: readonly number[] = [0, 7, 56, 63];
 
-function evaluateBoard(board: readonly ReversiCell[]): number {
+function evaluateBoard(board: readonly OthelloCell[]): number {
   let score = 0;
   const emptyCount = board.filter((c) => c === null).length;
   const isEndGame = emptyCount <= 10;
@@ -149,7 +149,7 @@ function evaluateBoard(board: readonly ReversiCell[]): number {
     return (O - X) * 100;
   }
 
-  for (let i = 0; i < REVERSI_CELL_COUNT; i++) {
+  for (let i = 0; i < OTHELLO_CELL_COUNT; i++) {
     const cell = board[i];
     if (cell === null) continue;
 
@@ -177,7 +177,7 @@ function evaluateBoard(board: readonly ReversiCell[]): number {
   return score;
 }
 
-function minimax(board: readonly ReversiCell[], depth: number, alpha: number, beta: number, isMaximizing: boolean): number {
+function minimax(board: readonly OthelloCell[], depth: number, alpha: number, beta: number, isMaximizing: boolean): number {
   const currentTurn: Player = isMaximizing ? 'O' : 'X';
   const validMoves = getValidMoves(board, currentTurn);
 
@@ -222,7 +222,7 @@ function minimax(board: readonly ReversiCell[], depth: number, alpha: number, be
   }
 }
 
-export function chooseReversiBotMove(board: readonly ReversiCell[], difficulty: GameDifficulty): number | null {
+export function chooseOthelloBotMove(board: readonly OthelloCell[], difficulty: GameDifficulty): number | null {
   const validMoves = getValidMoves(board, 'O');
   if (validMoves.length === 0) return null;
 

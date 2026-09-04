@@ -1,0 +1,199 @@
+@font-face {
+  font-family: 'Pinar';
+  src: url('/fonts/Pinar.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  color: var(--ink);
+  background: var(--bg);
+  font-family: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  font-synthesis: none;
+
+  /* Color */
+  --bg: #121a18;
+  --panel: #1c2824;
+  --panel-2: #23312c;
+  --ink: #f2f4e9;
+  --muted: #9aa79e;
+  --acid: #d6f36a;
+  --orange: #ff9a62;
+  --danger: #ff8585;
+  --danger-strong: #ff5555;
+  --danger-ink: #ffb5b5;
+  --line: rgba(235, 243, 222, 0.14);
+  --line-strong: rgba(235, 243, 222, 0.32);
+  --surface-clear: transparent;
+  --surface-tint: rgba(255, 255, 255, 0.05);
+  --surface-faint: rgba(255, 255, 255, 0.045);
+  --surface-subtle: rgba(255, 255, 255, 0.035);
+  --acid-tint: rgba(214, 243, 106, 0.12);
+  --acid-wash: rgba(214, 243, 106, 0.07);
+  --acid-border: rgba(214, 243, 106, 0.3);
+  --acid-border-soft: rgba(214, 243, 106, 0.25);
+  --orange-wash: rgba(255, 154, 98, 0.06);
+  --orange-border-soft: rgba(255, 154, 98, 0.25);
+  --danger-tint: rgba(255, 100, 100, 0.12);
+  --danger-tint-strong: rgba(255, 80, 80, 0.25);
+  --danger-border: rgba(255, 100, 100, 0.25);
+  --danger-border-strong: rgba(255, 100, 100, 0.5);
+  --ink-on-acid: #1d281d;
+  --ink-on-orange: #29251d;
+
+  /* Shape: controls < surfaces < feature cards < dialogs. */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
+  --radius-pill: 999px;
+  --radius-round: 50%;
+  --board-padding: 8px;
+
+  /* Borders and focus */
+  --border-thin: 1px;
+  --border-strong: 2px;
+  --border-heavy: 3px;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 3px;
+
+  /* Elevation */
+  --shadow-raised: 0 12px 34px rgba(0, 0, 0, 0.18);
+  --shadow-board: 0 10px 28px rgba(0, 0, 0, 0.16), var(--shadow-inset-highlight);
+  --shadow-inset-highlight: inset 0 1px 0 var(--surface-tint);
+  --shadow-card-inset: inset 0 2px 0 rgba(255, 255, 255, 0.22);
+  --shadow-card-inset-soft: inset 0 2px 0 rgba(255, 255, 255, 0.2);
+  --shadow-disc: inset 0 2px 0 rgba(255, 255, 255, 0.14), 0 2px 4px rgba(0, 0, 0, 0.22);
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-normal: 180ms;
+  --duration-slow: 260ms;
+  --ease-standard: ease;
+  --ease-out: ease-out;
+  --ease-spring: cubic-bezier(0.2, 0.75, 0.25, 1);
+
+  /* Typography */
+  --font-mono: 'DM Mono', 'Cascadia Code', ui-monospace, monospace;
+  --text-micro: 8px;
+  --text-caption: 9px;
+  --text-label: 10px;
+  --text-detail: 11px;
+  --text-control: 12px;
+  --text-body-sm: 13px;
+  --text-body: 14px;
+
+  /* Gradients are reserved for decorative or data-display surfaces. */
+  --gradient-score: linear-gradient(90deg, transparent, var(--game-wash), transparent);
+  --gradient-subtle: linear-gradient(135deg, var(--surface-tint), transparent);
+  --gradient-game-row: linear-gradient(135deg, var(--game-wash), var(--surface-faint) 58%);
+
+  /* Game palette */
+  --tic-card-bg: #c9ed62;
+  --tic-card-ink: #1b281f;
+  --tic-card-muted: rgba(27, 40, 31, 0.68);
+  --card-ink-border: rgba(20, 28, 23, 0.3);
+  --tic-mark-muted: #28412f;
+  --memory-card-bg: #8dc3bd;
+  --memory-card-ink: #162b2b;
+  --memory-card-muted: rgba(22, 43, 43, 0.68);
+  --memory-front-ink: #1e2b25;
+  --reaction-card-bg: #f4c45c;
+  --reaction-card-ink: #2b281b;
+  --reaction-card-muted: rgba(43, 40, 27, 0.68);
+  --reaction-light: #fff6c7;
+  --reaction-orb-ring-width: 11px;
+  --reaction-light-wash: rgba(255, 246, 199, 0.35);
+  --reaction-coral: #dc765b;
+  --reaction-coral-wash: rgba(220, 118, 91, 0.15);
+  --reaction-coral-border: rgba(220, 118, 91, 0.35);
+  --reaction-arena-end: #15221e;
+  --reaction-go-end: #263b27;
+  --reaction-go-ink: #182419;
+  --connect-card-bg: #b49ae8;
+  --connect-card-ink: #251d33;
+  --connect-card-muted: rgba(37, 29, 51, 0.68);
+  --connect-board-frame: #292055;
+  --connect-board-bg: #403574;
+  --dots-card-bg: #78c8e3;
+  --dots-card-ink: #152a33;
+  --dots-card-muted: rgba(21, 42, 51, 0.66);
+  --othello-card-bg: #4fd18c;
+  --othello-card-ink: #0f2b1d;
+  --othello-card-muted: rgba(15, 43, 29, 0.68);
+  --othello-preview-wash: rgba(15, 43, 29, 0.25);
+  --othello-board-frame: #1b4935;
+  --othello-board-bg: #143527;
+  --backdrop: rgba(6, 10, 9, 0.78);
+  --switch-bg: #25312d;
+  --switch-thumb: #839088;
+  --switch-on-ink: #1d281d;
+
+  --game-accent: var(--acid);
+  --game-accent-ink: var(--ink-on-acid);
+  --game-tint: var(--acid-tint);
+  --game-wash: var(--acid-wash);
+  --game-border: var(--acid-border);
+}
+
+:root[lang='fa'] {
+  font-family: 'Pinar', 'Vazirmatn', Tahoma, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Pinar', 'Vazirmatn', Tahoma, 'Segoe UI', system-ui, sans-serif;
+}
+
+.theme-tic {
+  --game-accent: var(--tic-card-bg);
+  --game-accent-ink: var(--tic-card-ink);
+  --game-tint: var(--acid-tint);
+  --game-wash: var(--acid-wash);
+  --game-border: var(--acid-border);
+}
+
+.theme-memory {
+  --game-accent: var(--memory-card-bg);
+  --game-accent-ink: var(--memory-card-ink);
+  --game-tint: rgba(141, 195, 189, 0.15);
+  --game-wash: rgba(141, 195, 189, 0.08);
+  --game-border: rgba(141, 195, 189, 0.35);
+}
+
+.theme-reaction {
+  --game-accent: var(--reaction-card-bg);
+  --game-accent-ink: var(--reaction-card-ink);
+  --game-tint: rgba(244, 196, 92, 0.15);
+  --game-wash: rgba(244, 196, 92, 0.08);
+  --game-border: rgba(244, 196, 92, 0.35);
+}
+
+.theme-connect {
+  --game-accent: var(--connect-card-bg);
+  --game-accent-ink: var(--connect-card-ink);
+  --game-tint: rgba(180, 154, 232, 0.15);
+  --game-wash: rgba(180, 154, 232, 0.08);
+  --game-border: rgba(180, 154, 232, 0.35);
+}
+
+.theme-dots {
+  --game-accent: var(--dots-card-bg);
+  --game-accent-ink: var(--dots-card-ink);
+  --game-tint: rgba(120, 200, 227, 0.15);
+  --game-wash: rgba(120, 200, 227, 0.08);
+  --game-border: rgba(120, 200, 227, 0.35);
+}
+
+.theme-othello {
+  --game-accent: var(--othello-card-bg);
+  --game-accent-ink: var(--othello-card-ink);
+  --game-tint: rgba(79, 209, 140, 0.15);
+  --game-wash: rgba(79, 209, 140, 0.08);
+  --game-border: rgba(79, 209, 140, 0.35);
+}
