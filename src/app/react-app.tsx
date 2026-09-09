@@ -11,6 +11,8 @@ import { ReactionDuelPage } from '../pages/reaction-duel/ReactionDuelPage';
 import { ConnectFourPage } from '../pages/connect-four/ConnectFourPage';
 import { DotsBoxesPage } from '../pages/dots-boxes/DotsBoxesPage';
 import { OthelloPage } from '../pages/othello/OthelloPage';
+import { NimPage } from '../pages/nim/NimPage';
+import { TugOfWarPage } from '../pages/tug-of-war/TugOfWarPage';
 import { GameSetupDialog } from '../components/GameSetupDialog';
 import { StatsPage } from '../components/StatsDialog';
 import { translate, useI18n, type Language } from './i18n';
@@ -159,7 +161,9 @@ export function ReactApp(): ReactElement {
       nextView === 'reaction' ||
       nextView === 'connect' ||
       nextView === 'dots' ||
-      nextView === 'othello'
+      nextView === 'othello' ||
+      nextView === 'nim' ||
+      nextView === 'tug'
     ) {
       window.history.pushState(historyStateFor('setup'), '');
       setPendingGame(nextView);
@@ -233,6 +237,8 @@ export function ReactApp(): ReactElement {
       {view === 'connect' && <ConnectFourPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {view === 'dots' && <DotsBoxesPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {view === 'othello' && <OthelloPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
+      {view === 'nim' && <NimPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
+      {view === 'tug' && <TugOfWarPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {pendingGame && (
         <GameSetupDialog
           gameTitle={gameTitle(pendingGame, language)}
@@ -269,6 +275,8 @@ function viewFromHistory(state: unknown): HistoryView | null {
     value === 'connect' ||
     value === 'dots' ||
     value === 'othello' ||
+    value === 'nim' ||
+    value === 'tug' ||
     value === 'setup' ||
     value === 'stats'
     ? (value as HistoryView)
@@ -281,6 +289,8 @@ function gameTitle(view: Exclude<View, 'menu' | 'settings' | 'stats'>, language:
   if (view === 'reaction') return translate(language, 'reactionDuel');
   if (view === 'connect') return translate(language, 'connectFour');
   if (view === 'dots') return translate(language, 'dotsBoxes');
+  if (view === 'nim') return translate(language, 'nim');
+  if (view === 'tug') return translate(language, 'tugOfWar');
   return translate(language, 'othello');
 }
 
@@ -421,12 +431,14 @@ function MenuPage({
           description={t('memoryDescription')}
           visual={
             <>
-              <span>✦</span>
+              <span className="is-matched">✦</span>
               <span>●</span>
-              <span>◆</span>
+              <span>☀</span>
+              <span>⬟</span>
               <span>✚</span>
-              <span>✦</span>
-              <span>●</span>
+              <span className="is-matched">✦</span>
+              <span>◒</span>
+              <span>✿</span>
             </>
           }
           firstMeta={
@@ -535,6 +547,108 @@ function MenuPage({
           }
           onSelect={onNavigate}
         />
+        <GameCard
+          view="nim"
+          number={t('strategy')}
+          title={t('nim')}
+          description={t('nimDescription')}
+          visual={
+            <div className="nim-rack-art">
+              <div className="nim-art-row">
+                <div className="nim-art-match is-lit">
+                  <i />
+                  <b />
+                </div>
+                <div className="nim-art-match">
+                  <i />
+                  <b />
+                </div>
+                <div className="nim-art-match">
+                  <i />
+                  <b />
+                </div>
+              </div>
+              <div className="nim-art-row">
+                <div className="nim-art-match">
+                  <i />
+                  <b />
+                </div>
+                <div className="nim-art-match is-lit">
+                  <i />
+                  <b />
+                </div>
+                <div className="nim-art-match">
+                  <i />
+                  <b />
+                </div>
+                <div className="nim-art-match">
+                  <i />
+                  <b />
+                </div>
+              </div>
+              <div className="nim-art-row">
+                <div className="nim-art-match">
+                  <i />
+                  <b />
+                </div>
+                <div className="nim-art-match">
+                  <i />
+                  <b />
+                </div>
+                <div className="nim-art-match is-lit">
+                  <i />
+                  <b />
+                </div>
+                <div className="nim-art-match">
+                  <i />
+                  <b />
+                </div>
+                <div className="nim-art-match is-lit">
+                  <i />
+                  <b />
+                </div>
+              </div>
+            </div>
+          }
+          firstMeta={
+            <>
+              <Icon name="flame" /> {t('matchesUnit')}
+            </>
+          }
+          secondMeta={
+            <>
+              <Icon name="bot" /> {t('vsBot')}
+            </>
+          }
+          onSelect={onNavigate}
+        />
+        <GameCard
+          view="tug"
+          number={t('action')}
+          title={t('tugOfWar')}
+          description={t('tugDescription')}
+          visual={
+            <div className="tug-card-visual-inner">
+              <div className="tug-card-rope-track">
+                <div className="tug-card-rope-line" />
+                <div className="tug-card-center-knot">
+                  <span>✦</span>
+                </div>
+              </div>
+            </div>
+          }
+          firstMeta={
+            <>
+              <Icon name="zap" /> {t('pullRope')}
+            </>
+          }
+          secondMeta={
+            <>
+              <Icon name="users" /> {t('headToHead')}
+            </>
+          }
+          onSelect={onNavigate}
+        />
       </section>
 
       <footer className="menu-footer">
@@ -579,7 +693,11 @@ function GameCard({
             ? 'connect-visual'
             : view === 'dots'
               ? 'dots-visual'
-              : 'othello-visual';
+              : view === 'othello'
+                ? 'othello-visual'
+                : view === 'nim'
+                  ? 'nim-visual'
+                  : 'tug-visual';
 
   return (
     <button

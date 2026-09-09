@@ -22,6 +22,10 @@ function gameTitle(key: GameKey, t: ReturnType<typeof useI18n>['t']): string {
       return t('dotsBoxes');
     case 'othello':
       return t('othello');
+    case 'nim':
+      return t('nim');
+    case 'tug':
+      return t('tugOfWar');
   }
 }
 
@@ -39,6 +43,10 @@ function gameIcon(key: GameKey): string {
       return 'grid';
     case 'othello':
       return 'grid';
+    case 'nim':
+      return 'flame';
+    case 'tug':
+      return 'zap';
   }
 }
 

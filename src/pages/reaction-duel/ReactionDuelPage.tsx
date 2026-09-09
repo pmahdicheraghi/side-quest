@@ -31,7 +31,7 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
   const botTimer = useRef<number | null>(null);
   const bestReactionRef = useRef<number | undefined>(undefined);
 
-  useEffect(() => animateIn('.score-strip, .reaction-arena, .reaction-buttons, .tip'), []);
+  useEffect(() => animateIn('.score-strip, .reaction-arena-wrap, .reaction-buttons, .tip'), []);
   useEffect(() => {
     const timeout = window.setTimeout(startRound, 600);
     return () => window.clearTimeout(timeout);
@@ -175,48 +175,50 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
         onExit={onExit}
       />
       <ScoreStrip leftLabel={playerNames.X} leftMark="✦" rightLabel={playerNames.O} rightMark="✦" scores={scores} />
-      <section className={`reaction-arena phase-${phase}`} aria-label={t('playerTapButtons')}>
-        <div className="reaction-signal">
-          <div className={`signal-orb ${phase === 'go' ? 'signal-go' : ''}`} aria-hidden="true">
-            <span>{phase === 'go' ? t('go') : '✦'}</span>
-          </div>
-          <div className="reaction-status" role="status" aria-live="assertive">
-            {status}
-          </div>
+      <section className={`reaction-arena-wrap phase-${phase}`}>
+        <div className="turn-label" role="status" aria-live="assertive">
+          {status}
         </div>
-        <div className="reaction-player-zones">
-          <button
-            type="button"
-            className={`reaction-player player-one ${winner === 'X' ? 'is-winner' : ''} ${falseStart === 'X' ? 'is-false-start' : ''}`}
-            onPointerDown={(event) => {
-              event.preventDefault();
-              tap('X');
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') tap('X');
-            }}
-            disabled={!running}
-          >
-            <span>{playerNames.X}</span>
-            <strong>{actionLabel('X')}</strong>
-            <small>{label('X')}</small>
-          </button>
-          <button
-            type="button"
-            className={`reaction-player player-two ${mode === 'bot' ? 'is-bot' : ''} ${winner === 'O' ? 'is-winner' : ''} ${falseStart === 'O' ? 'is-false-start' : ''}`}
-            onPointerDown={(event) => {
-              event.preventDefault();
-              tap('O');
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') tap('O');
-            }}
-            disabled={!running || mode === 'bot'}
-          >
-            <span>{playerNames.O}</span>
-            <strong>{actionLabel('O')}</strong>
-            <small>{label('O')}</small>
-          </button>
+        <div className={`reaction-arena phase-${phase}`} aria-label={t('playerTapButtons')}>
+          <div className="reaction-signal">
+            <div className={`signal-orb ${phase === 'go' ? 'signal-go' : ''}`} aria-hidden="true">
+              <span>{phase === 'go' ? t('go') : '✦'}</span>
+            </div>
+          </div>
+          <div className="reaction-player-zones">
+            <button
+              type="button"
+              className={`reaction-player player-one ${winner === 'X' ? 'is-winner' : ''} ${falseStart === 'X' ? 'is-false-start' : ''}`}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                tap('X');
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') tap('X');
+              }}
+              disabled={!running}
+            >
+              <span>{playerNames.X}</span>
+              <strong>{actionLabel('X')}</strong>
+              <small>{label('X')}</small>
+            </button>
+            <button
+              type="button"
+              className={`reaction-player player-two ${mode === 'bot' ? 'is-bot' : ''} ${winner === 'O' ? 'is-winner' : ''}`}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                tap('O');
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') tap('O');
+              }}
+              disabled={!running || mode === 'bot'}
+            >
+              <span>{playerNames.O}</span>
+              <strong>{actionLabel('O')}</strong>
+              <small>{label('O')}</small>
+            </button>
+          </div>
         </div>
       </section>
       <Tip>{t('reactionTip')}</Tip>

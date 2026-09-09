@@ -2,7 +2,7 @@ import type { GameDifficulty, View } from './types';
 
 export type GameKey = Exclude<View, 'menu' | 'settings' | 'stats'>;
 
-export const GAME_KEYS: readonly GameKey[] = ['tic', 'memory', 'reaction', 'connect', 'dots', 'othello'] as const;
+export const GAME_KEYS: readonly GameKey[] = ['tic', 'memory', 'reaction', 'connect', 'dots', 'othello', 'nim', 'tug'] as const;
 
 export interface GameStats {
   played: number;
@@ -41,6 +41,8 @@ export function createDefaultAllStats(): AllStats {
     connect: createDefaultGameStats(),
     dots: createDefaultGameStats(),
     othello: createDefaultGameStats(),
+    nim: createDefaultGameStats(),
+    tug: createDefaultGameStats(),
   };
 }
 

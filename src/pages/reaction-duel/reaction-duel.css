@@ -1,6 +1,21 @@
-.reaction-arena {
+.reaction-arena-wrap {
+  text-align: center;
   width: min(100%, 420px);
-  min-height: 310px;
+  margin: 0 auto;
+}
+
+.reaction-arena-wrap .turn-label {
+  color: var(--muted);
+  transition: color var(--duration-normal) var(--ease-standard);
+}
+
+.reaction-arena-wrap.phase-go .turn-label {
+  color: var(--game-accent);
+}
+
+.reaction-arena {
+  width: 100%;
+  min-height: 290px;
   position: relative;
   overflow: hidden;
   margin: auto;
@@ -27,7 +42,7 @@
 
 .reaction-player {
   min-width: 0;
-  padding: 194px 14px 20px;
+  padding: 160px 14px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -120,12 +135,10 @@
   width: 100%;
   position: absolute;
   z-index: 2;
-  top: 34px;
+  top: 28px;
   left: 0;
   display: grid;
   justify-items: center;
-  gap: 29px;
-  padding-inline: 18px;
   pointer-events: none;
 }
 
@@ -164,25 +177,6 @@
   font-weight: 700;
 }
 
-.reaction-status {
-  min-height: 34px;
-  max-width: 280px;
-  display: grid;
-  place-items: center;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: var(--text-label);
-  font-weight: 600;
-  line-height: 1.45;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-}
-
-.phase-go .reaction-status {
-  color: var(--game-accent);
-}
-
 .reaction-screen .score-mark.x-label,
 .reaction-screen .score-player-x.is-leading strong {
   color: var(--game-accent);
@@ -217,12 +211,11 @@
 
 @media (max-width: 370px) {
   .reaction-arena {
-    min-height: 286px;
+    min-height: 270px;
   }
 
   .reaction-signal {
-    top: 30px;
-    gap: 24px;
+    top: 22px;
   }
 
   .signal-orb {
@@ -231,6 +224,6 @@
   }
 
   .reaction-player {
-    padding: 177px 10px 16px;
+    padding: 146px 10px 16px;
   }
 }

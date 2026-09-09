@@ -17,7 +17,7 @@
 :root {
   color: var(--ink);
   background: var(--bg);
-  font-family: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Segoe UI', system-ui, sans-serif;
   font-synthesis: none;
 
   /* Color */
@@ -139,12 +139,24 @@
   --game-accent-ink: #0f2b1d;
 }
 
+.theme-nim {
+  --game-accent: #ff9a62;
+  --game-accent-ink: #29251d;
+}
+
+.theme-tug {
+  --game-accent: #ff5376;
+  --game-accent-ink: #2b1419;
+}
+
 .theme-tic,
 .theme-memory,
 .theme-reaction,
 .theme-connect,
 .theme-dots,
-.theme-othello {
+.theme-othello,
+.theme-nim,
+.theme-tug {
   --game-tint: color-mix(in srgb, var(--game-accent) 15%, transparent);
   --game-wash: color-mix(in srgb, var(--game-accent) 8%, transparent);
   --game-border: color-mix(in srgb, var(--game-accent) 35%, transparent);

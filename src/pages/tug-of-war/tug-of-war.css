@@ -1,0 +1,232 @@
+.tug-arena-wrap {
+  text-align: center;
+  width: min(100%, 420px);
+  margin: 0 auto;
+}
+
+.tug-arena {
+  width: 100%;
+  min-height: 280px;
+  position: relative;
+  overflow: hidden;
+  border: var(--border-thin) solid var(--game-border);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+}
+
+.tug-player-zones {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.tug-player {
+  min-width: 0;
+  padding: 100px 14px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  border-radius: 0;
+  background: var(--game-wash);
+  color: var(--game-accent);
+  transition:
+    background var(--duration-normal) var(--ease-standard),
+    opacity var(--duration-normal) var(--ease-standard),
+    transform var(--duration-normal) var(--ease-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tug-player.player-two {
+  border-inline-start: var(--border-thin) solid var(--line);
+  background: var(--orange-wash);
+  color: var(--orange);
+}
+
+.tug-player:focus-visible {
+  outline-offset: -4px;
+}
+
+.tug-player:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.tug-player:disabled {
+  cursor: not-allowed;
+}
+
+.tug-player.is-bot:disabled {
+  cursor: default;
+  opacity: 0.82;
+}
+
+.tug-player.is-winner {
+  opacity: 1;
+  background: var(--game-tint);
+}
+
+.tug-player.is-bot.is-winner {
+  opacity: 1;
+}
+
+.tug-player.player-two.is-winner {
+  background: var(--orange-wash);
+}
+
+.tug-player span,
+.tug-player small {
+  max-width: 100%;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tug-player span {
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tug-player strong {
+  max-width: 100%;
+  font-size: clamp(17px, 5vw, 23px);
+  line-height: 1.15;
+  letter-spacing: -0.045em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.tug-player small {
+  color: var(--muted);
+  font-size: var(--text-micro);
+  letter-spacing: 0.06em;
+}
+
+.tug-center {
+  width: 100%;
+  position: absolute;
+  z-index: 2;
+  top: 24px;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  padding-inline: 22px;
+  pointer-events: none;
+}
+
+.tug-rig {
+  width: 100%;
+  max-width: 360px;
+  position: relative;
+  direction: ltr; /* Keeps coordinate calculations consistent across directions */
+}
+
+.tug-rope-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;
+}
+
+.tug-rope-line {
+  width: 100%;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: #1c2824;
+  border: 1px solid var(--line-strong);
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 6px,
+    rgba(255, 255, 255, 0.22) 6px,
+    rgba(255, 255, 255, 0.22) 11px
+  );
+}
+
+.tug-track-center-tick {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 18px;
+  background: var(--line-strong);
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.tug-rope-fill {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 10px;
+  background: var(--game-accent);
+  opacity: 0.65;
+  border-radius: var(--radius-pill);
+  transition:
+    width 60ms linear,
+    left 60ms linear;
+  z-index: 1;
+}
+
+.tug-knot {
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-round);
+  background: var(--game-accent);
+  color: var(--game-accent-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  border: 2.5px solid var(--game-accent-ink);
+  transform: translate(-50%, -50%);
+  transition: left 50ms cubic-bezier(0.1, 0.7, 0.1, 1);
+  z-index: 2;
+}
+
+.tug-page .score-mark.x-label,
+.tug-page .score-player-x.is-leading strong {
+  color: var(--game-accent);
+}
+
+.tug-page .score-mark.o-label,
+.tug-page .score-player-o.is-leading strong {
+  color: var(--orange);
+}
+
+.tug-page .score-mark.x-label.is-active {
+  border-color: var(--game-border);
+}
+
+.tug-page .score-mark.o-label.is-active {
+  border-color: var(--orange-border-soft);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tug-player:not(:disabled):hover {
+    filter: brightness(1.12);
+  }
+}
+
+@media (max-width: 370px) {
+  .tug-arena {
+    min-height: 260px;
+  }
+
+  .tug-center {
+    top: 20px;
+  }
+
+  .tug-player {
+    padding: 88px 10px 18px;
+  }
+}
