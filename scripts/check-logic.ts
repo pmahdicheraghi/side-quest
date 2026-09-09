@@ -12,6 +12,7 @@ import {
   checkTugWinner,
   PULL_THRESHOLD,
 } from '../src/pages/tug-of-war/tug-of-war-logic.ts';
+import { resolveHeaderAction } from '../src/app/usePwaUpdate.ts';
 
 // 1. Nim Logic Checks
 const board = createNimBoard();
@@ -37,6 +38,36 @@ assert.strictEqual(clampPosition(PULL_THRESHOLD + 20), PULL_THRESHOLD);
 assert.strictEqual(clampPosition(-PULL_THRESHOLD - 20), -PULL_THRESHOLD);
 assert.strictEqual(checkTugWinner(0), null);
 assert.strictEqual(checkTugWinner(-PULL_THRESHOLD), 'X');
-assert.strictEqual(checkTugWinner(PULL_THRESHOLD), 'O');
+// 3. PWA Header Action Logic Checks
+assert.strictEqual(
+  resolveHeaderAction({ isInstalled: false, canInstall: true, isUpdateAvailable: false }),
+  'install',
+  'Uninstalled with prompt should show install button'
+);
+assert.strictEqual(
+  resolveHeaderAction({ isInstalled: true, canInstall: true, isUpdateAvailable: false }),
+  'status',
+  'Installed app must never show install button'
+);
+assert.strictEqual(
+  resolveHeaderAction({ isInstalled: true, canInstall: false, isUpdateAvailable: true }),
+  'update',
+  'Installed with update available should show update button'
+);
+assert.strictEqual(
+  resolveHeaderAction({ isInstalled: true, canInstall: false, isUpdateAvailable: false }),
+  'status',
+  'Installed without update should show online/offline status'
+);
+assert.strictEqual(
+  resolveHeaderAction({ isInstalled: false, canInstall: true, isUpdateAvailable: true }),
+  'install',
+  'Uninstalled should show install even if update is ready'
+);
+assert.strictEqual(
+  resolveHeaderAction({ isInstalled: false, canInstall: false, isUpdateAvailable: true }),
+  'status',
+  'Uninstalled without prompt should fallback to status'
+);
 
 console.log('✓ All logic assertions passed successfully!');

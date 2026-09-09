@@ -25,6 +25,18 @@ export function installedWorkerAction(workerUrl: string, currentBuild: string, h
   return new URL(workerUrl).searchParams.get('v') === currentBuild ? 'activate' : 'prompt';
 }
 
+export type HeaderActionState = 'install' | 'update' | 'status';
+
+export function resolveHeaderAction(params: {
+  isInstalled: boolean;
+  canInstall: boolean;
+  isUpdateAvailable: boolean;
+}): HeaderActionState {
+  if (!params.isInstalled && params.canInstall) return 'install';
+  if (params.isInstalled && params.isUpdateAvailable) return 'update';
+  return 'status';
+}
+
 function releaseFromWorker(worker: ServiceWorker): string | null {
   return new URL(worker.scriptURL).searchParams.get('v')?.split(/[+-]/, 1)[0] || null;
 }

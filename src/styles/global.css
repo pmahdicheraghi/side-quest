@@ -498,6 +498,14 @@ h1 em {
   width: 14px;
   height: 14px;
 }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.header-update-btn:disabled .icon {
+  animation: spin 1s linear infinite;
+}
 .update-banner {
   position: relative;
   z-index: 2;

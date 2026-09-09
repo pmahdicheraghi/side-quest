@@ -18,7 +18,7 @@ import { StatsPage } from '../components/StatsDialog';
 import { translate, useI18n, type Language } from './i18n';
 import { animateIn } from './animation';
 import { Icon } from '../components/react-layout';
-import { usePwaUpdate } from './usePwaUpdate';
+import { resolveHeaderAction, usePwaUpdate } from './usePwaUpdate';
 import { limitPlayerName, loadPlayerNames, normalizePlayerName, savePlayerNames, type PlayerNames } from './player-names';
 
 type InstallOutcome = 'accepted' | 'dismissed';
@@ -30,8 +30,36 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: InstallOutcome; platform: string }>;
 }
 
+const PWA_INSTALLED_KEY = 'pwa_installed';
+
 function isStandaloneDisplayMode(): boolean {
-  return window.matchMedia('(display-mode: standalone)').matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+  if (typeof window === 'undefined') return false;
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    window.matchMedia('(display-mode: minimal-ui)').matches ||
+    Boolean((navigator as Navigator & { standalone?: boolean }).standalone) ||
+    document.referrer.startsWith('android-app://')
+  );
+}
+
+function getInitialIsInstalled(): boolean {
+  if (isStandaloneDisplayMode()) return true;
+  try {
+    return localStorage.getItem(PWA_INSTALLED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function setStorageInstalled(installed: boolean): void {
+  try {
+    if (installed) localStorage.setItem(PWA_INSTALLED_KEY, 'true');
+    else localStorage.removeItem(PWA_INSTALLED_KEY);
+  } catch {
+    // Storage access may fail in private mode or embedded frames.
+  }
 }
 
 export function ReactApp(): ReactElement {
@@ -42,7 +70,7 @@ export function ReactApp(): ReactElement {
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const [playerNames, setPlayerNames] = useState<PlayerNames>(() => loadPlayerNames());
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(isStandaloneDisplayMode);
+  const [isInstalled, setIsInstalled] = useState(getInitialIsInstalled);
   const [eitaaCanAddToHomeScreen, setEitaaCanAddToHomeScreen] = useState(false);
   const [dismissedUpdate, setDismissedUpdate] = useState<string | null>(null);
   const musicRef = useRef<MusicController | null>(null);
@@ -64,17 +92,43 @@ export function ReactApp(): ReactElement {
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
+      setIsInstalled(false);
+      setStorageInstalled(false);
     };
     const handleAppInstalled = () => {
       setInstallPrompt(null);
       setIsInstalled(true);
+      setStorageInstalled(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
+
+    if ('getInstalledRelatedApps' in navigator) {
+      (navigator as Navigator & { getInstalledRelatedApps?: () => Promise<unknown[]> })
+        .getInstalledRelatedApps?.()
+        .then((apps) => {
+          if (Array.isArray(apps) && apps.length > 0) {
+            setIsInstalled(true);
+            setStorageInstalled(true);
+          }
+        })
+        .catch(() => {});
+    }
+
+    const standaloneMedia = window.matchMedia('(display-mode: standalone)');
+    const handleMediaChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        setIsInstalled(true);
+        setStorageInstalled(true);
+      }
+    };
+    standaloneMedia.addEventListener?.('change', handleMediaChange);
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
+      standaloneMedia.removeEventListener?.('change', handleMediaChange);
     };
   }, []);
 
@@ -194,7 +248,10 @@ export function ReactApp(): ReactElement {
     await installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
     setInstallPrompt(null);
-    if (outcome === 'accepted') setIsInstalled(true);
+    if (outcome === 'accepted') {
+      setIsInstalled(true);
+      setStorageInstalled(true);
+    }
   };
 
   return (
@@ -212,8 +269,10 @@ export function ReactApp(): ReactElement {
       {view === 'menu' && (
         <MenuPage
           onNavigate={navigate}
-          canInstall={Boolean((installPrompt && !isInstalled) || eitaaCanAddToHomeScreen)}
+          isInstalled={isInstalled}
+          canInstall={!isInstalled && Boolean(installPrompt || eitaaCanAddToHomeScreen)}
           onInstall={installApp}
+          isUpdateAvailable={pwaUpdate.status === 'ready' || pwaUpdate.status === 'applying'}
           updateVersion={pwaUpdate.availableVersion}
           isUpdating={pwaUpdate.status === 'applying'}
           showUpdate={(pwaUpdate.status === 'ready' || pwaUpdate.status === 'applying') && dismissedUpdate !== pwaUpdate.availableVersion}
@@ -296,8 +355,10 @@ function gameTitle(view: Exclude<View, 'menu' | 'settings' | 'stats'>, language:
 
 function MenuPage({
   onNavigate,
+  isInstalled,
   canInstall,
   onInstall,
+  isUpdateAvailable,
   updateVersion,
   isUpdating,
   showUpdate,
@@ -305,8 +366,10 @@ function MenuPage({
   onDismissUpdate,
 }: {
   onNavigate: (view: View) => void;
+  isInstalled: boolean;
   canInstall: boolean;
   onInstall: () => void;
+  isUpdateAvailable: boolean;
   updateVersion: string | null;
   isUpdating: boolean;
   showUpdate: boolean;
@@ -315,6 +378,7 @@ function MenuPage({
 }) {
   const { language, t } = useI18n();
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+  const headerAction = resolveHeaderAction({ isInstalled, canInstall, isUpdateAvailable });
 
   useEffect(() => {
     animateIn('.welcome > *, .game-card, .menu-footer');
@@ -339,13 +403,24 @@ function MenuPage({
           <span>{t('appName')}</span>
         </button>
         <div className="menu-topbar-actions">
-          {canInstall && (
+          {headerAction === 'install' && (
             <button type="button" className="header-install-btn" onClick={onInstall}>
               <Icon name="download" />
               <span>{t('installApp')}</span>
             </button>
           )}
-          {!canInstall && (
+          {headerAction === 'update' && (
+            <button
+              type="button"
+              className="header-install-btn header-update-btn"
+              onClick={onUpdate}
+              disabled={isUpdating}
+            >
+              <Icon name="update" />
+              <span>{t(isUpdating ? 'updating' : 'updateNow')}</span>
+            </button>
+          )}
+          {headerAction === 'status' && (
             <span className={`topbar-meta connection-status ${isOnline ? 'is-online' : 'is-offline'}`} role="status" aria-live="polite">
               <span className="online-dot" aria-hidden="true" />
               {t(isOnline ? 'online' : 'offline')}
