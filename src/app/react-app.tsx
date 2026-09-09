@@ -410,12 +410,7 @@ function MenuPage({
             </button>
           )}
           {headerAction === 'update' && (
-            <button
-              type="button"
-              className="header-install-btn header-update-btn"
-              onClick={onUpdate}
-              disabled={isUpdating}
-            >
+            <button type="button" className="header-install-btn header-update-btn" onClick={onUpdate} disabled={isUpdating}>
               <Icon name="update" />
               <span>{t(isUpdating ? 'updating' : 'updateNow')}</span>
             </button>

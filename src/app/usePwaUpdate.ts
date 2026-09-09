@@ -27,11 +27,7 @@ export function installedWorkerAction(workerUrl: string, currentBuild: string, h
 
 export type HeaderActionState = 'install' | 'update' | 'status';
 
-export function resolveHeaderAction(params: {
-  isInstalled: boolean;
-  canInstall: boolean;
-  isUpdateAvailable: boolean;
-}): HeaderActionState {
+export function resolveHeaderAction(params: { isInstalled: boolean; canInstall: boolean; isUpdateAvailable: boolean }): HeaderActionState {
   if (!params.isInstalled && params.canInstall) return 'install';
   if (params.isInstalled && params.isUpdateAvailable) return 'update';
   return 'status';
