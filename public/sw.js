@@ -1,7 +1,16 @@
 const CACHE_PREFIX = 'side-quest-';
 const workerVersion = new URL(self.location.href).searchParams.get('v') || 'legacy';
 const CACHE_NAME = `${CACHE_PREFIX}${workerVersion}`;
-const APP_SHELL = ['./', './manifest.webmanifest', './icon.svg', './fonts/Vazirmatn.ttf', './audio/side-quest.mp3'];
+const APP_SHELL = [
+  './',
+  './manifest.webmanifest',
+  './192x192.png',
+  './512x512.png',
+  './icon.svg',
+  './fonts/Vazirmatn.ttf',
+  './fonts/Pinar.ttf',
+  './audio/side-quest.mp3',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
